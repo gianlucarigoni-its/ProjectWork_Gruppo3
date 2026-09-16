@@ -3,9 +3,9 @@ import "dotenv/config";
 import mongoose from "mongoose";
 
 import { BannkAccountModel } from "./api/accounts/accounts.model";
-import { AccountTransictionModel } from "./api/transictions/transiction.model";
+import { AccountTransactionModel } from "./api/Transactions/Transaction.model";
 
-import { TransactionCategory, TransactionType } from "./api/transictions/transiction.entity";
+import { TransactionCategory, TransactionType } from "./api/Transactions/Transaction.entity";
 
 const dbPassword = process.env.DB_PASSWORD;
 
@@ -47,7 +47,7 @@ async function seedDatabase(): Promise<void> {
 
     const [gianlucaAccount, marioAccount] = accounts;
 
-    await AccountTransictionModel.create([
+    await AccountTransactionModel.create([
       {
         accountId: gianlucaAccount._id,
         amount: 1500,

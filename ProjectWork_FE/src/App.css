@@ -5,7 +5,7 @@
   color: var(--accent);
   background: var(--accent-bg);
   border: 2px solid transparent;
-  transiction: border-color 0.3s;
+  transaction: border-color 0.3s;
   margin-bottom: 24px;
 
   &:hover {
@@ -123,7 +123,7 @@
     align-items: center;
     gap: 8px;
     text-decoration: none;
-    transiction: box-shadow 0.3s;
+    transaction: box-shadow 0.3s;
 
     &:hover {
       box-shadow: var(--shadow);
