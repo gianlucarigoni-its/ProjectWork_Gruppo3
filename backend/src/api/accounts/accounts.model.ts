@@ -1,7 +1,7 @@
 import { Model, model, Schema } from "mongoose";
 import { Accounts } from "./accounts.entity";
 
-const BannkAccountSchema = new Schema<Accounts>(
+const AccountSchema = new Schema<Accounts>(
   {
     username: String,
     firstName: String,
@@ -17,11 +17,11 @@ const BannkAccountSchema = new Schema<Accounts>(
   },
 );
 
-BannkAccountSchema.virtual("fullName").get(function () {
+AccountSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
-BannkAccountSchema.set("toJSON", {
+AccountSchema.set("toJSON", {
   virtuals: true,
   transform: (_, ret: any) => {
     delete ret._id;
@@ -30,7 +30,7 @@ BannkAccountSchema.set("toJSON", {
   },
 });
 
-BannkAccountSchema.set("toObject", {
+AccountSchema.set("toObject", {
   virtuals: true,
   transform: (_, ret: any) => {
     delete ret._id;
@@ -39,4 +39,4 @@ BannkAccountSchema.set("toObject", {
   },
 });
 
-export const BannkAccountModel = model<Accounts>("Accounts", BannkAccountSchema);
+export const AccountModel = model<Accounts>("Accounts", AccountSchema);

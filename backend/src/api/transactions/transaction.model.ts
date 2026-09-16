@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose";
-import { AccountTransaction, TransactionCategory, TransactionType } from "./transaction.entity";
+import { Transaction, TransactionCategory, TransactionType } from "./transaction.entity";
 
-const AccountTransactionSchema = new Schema<AccountTransaction>(
+const TransactionSchema = new Schema<Transaction>(
   {
     accountId: {
       type: Schema.Types.ObjectId,
@@ -26,7 +26,7 @@ const AccountTransactionSchema = new Schema<AccountTransaction>(
   },
 );
 
-AccountTransactionSchema.set("toJSON", {
+TransactionSchema.set("toJSON", {
   virtuals: true,
   transform: (_, ret: any) => {
     delete ret._id;
@@ -35,7 +35,7 @@ AccountTransactionSchema.set("toJSON", {
   },
 });
 
-AccountTransactionSchema.set("toObject", {
+TransactionSchema.set("toObject", {
   virtuals: true,
   transform: (_, ret: any) => {
     delete ret._id;
@@ -44,4 +44,4 @@ AccountTransactionSchema.set("toObject", {
   },
 });
 
-export const AccountTransactionModel = model<AccountTransaction>("Transaction", AccountTransactionSchema);
+export const TransactionModel = model<Transaction>("Transaction", TransactionSchema);

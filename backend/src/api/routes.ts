@@ -1,8 +1,8 @@
 import { Router } from "express";
-import TransactionRouter from "./transactions/transaction.router";
+import accountsRouter from "./accounts/accounts.router";
 
 const router = Router();
 
-router.use("/trasiction", TransactionRouter);
+router.use("/accounts", accountsRouter);
 
 export default router;

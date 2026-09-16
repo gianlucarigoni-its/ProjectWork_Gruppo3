@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export type AccountTransaction = {
+export type Transaction = {
   id: string;
   accountId: Types.ObjectId;
   amount: number; //importo movimento

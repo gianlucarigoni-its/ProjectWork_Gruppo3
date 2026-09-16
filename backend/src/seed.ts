@@ -2,10 +2,10 @@ import "dotenv/config";
 
 import mongoose from "mongoose";
 
-import { BannkAccountModel } from "./api/accounts/accounts.model";
-import { AccountTransactionModel } from "./api/Transactions/Transaction.model";
+import { AccountModel } from "./api/accounts/accounts.model";
+import { TransactionModel } from "./api/transactions/transaction.model";
 
-import { TransactionCategory, TransactionType } from "./api/Transactions/Transaction.entity";
+import { TransactionCategory, TransactionType } from "./api/transactions/transaction.entity";
 
 const dbPassword = process.env.DB_PASSWORD;
 
@@ -13,7 +13,9 @@ if (!dbPassword) {
   throw new Error("DB_PASSWORD non configurata nel file .env");
 }
 
-const mongoUri = `mongodb+srv://gianlucarigoni_db_user:${encodeURIComponent(dbPassword)}` + "@bankinappdb.wiep7c5.mongodb.net/bankingApp";
+const mongoUri =
+  `mongodb+srv://gianlucarigoni_db_user:${encodeURIComponent(dbPassword)}` +
+  "@bankinappdb.wiep7c5.mongodb.net/bankingApp";
 
 async function seedDatabase(): Promise<void> {
   try {
@@ -21,19 +23,19 @@ async function seedDatabase(): Promise<void> {
 
     console.log("MongoDB connected");
 
-    const accountsCount = await BannkAccountModel.countDocuments();
+    const accountsCount = await AccountModel.countDocuments();
 
     if (accountsCount > 0) {
       console.log("Database già popolato: seed saltato");
       return;
     }
 
-    const accounts = await BannkAccountModel.create([
+    const accounts = await AccountModel.create([
       {
         username: "gianluca",
         firstName: "Gianluca",
         lastName: "Rigoni",
-        balance: 1500,
+        balance: 1424.5,
         IBAN: "IT60X0542811101000000123456",
       },
       {
@@ -41,13 +43,13 @@ async function seedDatabase(): Promise<void> {
         firstName: "Mario",
         lastName: "Rossi",
         IBAN: "IT60X0542811101000000654321",
-        balance: 2000,
+        balance: 1750,
       },
     ]);
 
     const [gianlucaAccount, marioAccount] = accounts;
 
-    await AccountTransactionModel.create([
+    await TransactionModel.create([
       {
         accountId: gianlucaAccount._id,
         amount: 1500,
