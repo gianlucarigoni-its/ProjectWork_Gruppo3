@@ -9,7 +9,7 @@ if (!dbPassword) throw new Error("DB_PASSWORD non configurata nel file .env");
 
 mongoose.set("debug", true);
 mongoose
-  .connect(`mongodb+srv://gianlucarigoni_db_user:${encodeURIComponent(dbPassword)}` + `@bankinappdb.wiep7c5.mongodb.net/bankinapp`)
+  .connect(`mongodb+srv://gianlucarigoni_db_user:${encodeURIComponent(dbPassword)}` + `@bankinappdb.wiep7c5.mongodb.net/bankingApp`)
   .then((_) => {
     console.log("MongoDB connected");
     createServer(app).listen(3000, () => {

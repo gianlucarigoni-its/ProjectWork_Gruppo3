@@ -9,7 +9,7 @@
     "dev": "nodemon",
     "start": "tsx src/index.ts",
     "build": "tsc",
-    "gen-data": "tsx gen-data.ts"
+    "seed": "tsx src/seed.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

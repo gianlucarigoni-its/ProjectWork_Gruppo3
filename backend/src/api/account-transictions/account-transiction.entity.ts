@@ -1,16 +1,15 @@
 import { Types } from "mongoose";
 
-export type AccountTransition = {
+export type AccountTransiction = {
   id: string;
-  bankAccountId: Types.ObjectId;
+  accountId: Types.ObjectId;
   amount: number; //importo movimento
-  balance: number; //saldo conto dopo il movimento
-  decription: string;
+  description: string;
   category: TransactionCategory;
   type: TransactionType;
+  date: Date;
 };
 
-// 1. L'Enum con le categorie
 export enum TransactionCategory {
   AccountOpening = "accountOpening",
   IncomingTransfer = "incomingTransfer",
@@ -22,6 +21,6 @@ export enum TransactionCategory {
 }
 
 export enum TransactionType {
-  income = "income",
-  outcome = "outcome",
+  Income = "income",
+  Outcome = "outcome",
 }

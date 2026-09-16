@@ -5,4 +5,6 @@ export type Accounts = {
   firstName: string;
   fullName: string;
   IBAN: string;
+  balance: number;
+  createdAt: Date;
 };
