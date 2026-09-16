@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { AccountTransiction, TransactionCategory, TransactionType } from "./account-transiction.entity";
+import { AccountTransiction, TransactionCategory, TransactionType } from "./transiction.entity";
 
 const AccountTransictionSchema = new Schema<AccountTransiction>(
   {

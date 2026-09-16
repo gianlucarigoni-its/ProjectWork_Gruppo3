@@ -2,10 +2,10 @@ import "dotenv/config";
 
 import mongoose from "mongoose";
 
-import { BannkAccountModel } from "./api/bank-accounts/bank-accounts.model";
-import { AccountTransictionModel } from "./api/account-transictions/account-transiction.model";
+import { BannkAccountModel } from "./api/accounts/accounts.model";
+import { AccountTransictionModel } from "./api/transictions/transiction.model";
 
-import { TransactionCategory, TransactionType } from "./api/account-transictions/account-transiction.entity";
+import { TransactionCategory, TransactionType } from "./api/transictions/transiction.entity";
 
 const dbPassword = process.env.DB_PASSWORD;
 

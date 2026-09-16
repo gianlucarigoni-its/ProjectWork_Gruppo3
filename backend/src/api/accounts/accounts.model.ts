@@ -1,5 +1,5 @@
 import { Model, model, Schema } from "mongoose";
-import { Accounts } from "./bank-accounts.entity";
+import { Accounts } from "./accounts.entity";
 
 const BannkAccountSchema = new Schema<Accounts>(
   {
