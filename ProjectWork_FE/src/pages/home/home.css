@@ -38,6 +38,10 @@
   border-radius: 12px;
   margin-bottom: 2rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  max-width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
 
 .card-label {
@@ -48,7 +52,7 @@
 }
 
 .card-amount {
-  font-size: 2.2rem;
+  font-size: 2.7rem;
   margin: 0.5rem 0 0 0;
 }
 

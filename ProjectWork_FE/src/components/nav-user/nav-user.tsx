@@ -1,0 +1,106 @@
+// import React, { useState } from 'react';
+// import { User } from '../../services/auth.service';
+
+// interface NavUserProps {
+//   user: User;
+//   onLogout: () => void;
+// }
+
+// export const NavUser: React.FC<NavUserProps> = ({ user, onLogout }) => {
+//   const [isOpen, setIsOpen] = useState(false);
+
+//   const toggleDropdown = () => setIsOpen((prev) => !prev);
+
+//   return (
+//     <div className="dropdown position-relative">
+//       {/* Bottone per aprire il Dropdown */}
+//       <button
+//         className="btn btn-secondary dropdown-toggle"
+//         type="button"
+//         onClick={toggleDropdown}
+//         aria-expanded={isOpen}
+//       >
+//         {user.firstName || user.username || 'Utente'}
+//       </button>
+
+//       {/* Menu a discesa */}
+//       {isOpen && (
+//         <ul className="dropdown-menu show position-absolute end-0 mt-1">
+//           <li>
+//             <button className="dropdown-item" type="button" onClick={onLogout}>
+//               Logout
+//             </button>
+//           </li>
+//         </ul>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default NavUser;
+
+import React, { useState } from 'react';
+import './nav-user.css';
+
+interface NavUserProps {
+  userName?: string;
+  onLogout?: () => void;
+}
+
+export const NavUser: React.FC<NavUserProps> = ({ 
+  userName = 'Gianluca Rigoni', 
+  onLogout 
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="nav-user-container">
+      {/* Bottone con Icona Utente */}
+      <button
+        className="nav-user-btn"
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        title="Account"
+      >
+        {/* SVG Icona Utente */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          fill="#0d6efd"
+          viewBox="0 0 16 16"
+        >
+          <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
+        </svg>
+      </button>
+
+      {/* Menu a discesa */}
+      {isOpen && (
+        <ul className="nav-user-dropdown">
+          <li className="nav-user-header">
+            {userName}
+          </li>
+          <li>
+            <button
+              className="nav-user-item"
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                if (onLogout) onLogout();
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fillRule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                <path fillRule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+              </svg>
+              Logout
+            </button>
+          </li>
+        </ul>
+      )}
+    </div>
+  );
+};
+
+export default NavUser;

@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
-import { AccountModel } from "../../accounts/accounts.model"; // Corretto typo BankAccountModel
-import { TransactionModel } from "../../transactions/transaction.model";
-import { TransactionCategory, TransactionType } from "../../transactions/transaction.entity";
-import { AuditLogModel } from "../../auditLog/audit-log.schema";
+import mongoose from 'mongoose';
+import { AccountModel } from '../../accounts/accounts.model'; // Corretto typo BankAccountModel
+import { TransactionModel } from '../../transactions/transaction.model';
+import { TransactionCategory, TransactionType } from '../../transactions/transaction.entity';
+import { AuditLogModel } from '../../auditLog/audit-log.schema';
 
 export class RicaricaService {
   static async executeRicarica(

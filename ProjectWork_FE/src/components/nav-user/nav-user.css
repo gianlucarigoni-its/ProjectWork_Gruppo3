@@ -1,0 +1,70 @@
+/* Contenitore principale del dropdown */
+.nav-user-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Bottone circolare dell'avatar */
+.nav-user-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  padding: 0;
+}
+
+.nav-user-btn:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+/* Menu a discesa */
+.nav-user-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+  min-width: 160px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  list-style: none;
+  padding: 8px 0;
+  margin-bottom: 0;
+  z-index: 1000;
+}
+
+.nav-user-header {
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333333;
+  border-bottom: 1px solid #eeeeee;
+  margin-bottom: 4px;
+}
+
+.nav-user-item {
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  color: #dc3545; /* Rosso per il logout */
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.nav-user-item:hover {
+  background-color: #f8f9fa;
+}
