@@ -1,8 +1,5 @@
-import { Request } from 'express';
-import { ParamsDictionary } from 'express-serve-static-core';
-import { ParsedQs } from 'qs';
+import { Request } from "express";
 
-export interface TypedRequest<B = any, Q = ParsedQs, P = ParamsDictionary>
-        extends Request<P, any, B, Q> {};
-
-export { ParamsDictionary, ParsedQs };
+export interface TypedRequest<T> extends Request {
+  body: T;
+}

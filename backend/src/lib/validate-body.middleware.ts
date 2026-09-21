@@ -1,18 +1,27 @@
+import { RequestHandler } from "express";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
-import { RequestHandler } from "express";
 
-export function validateBody<T extends object>(dtoClass: new () => T): RequestHandler {
+type Source = "body" | "query" | "params";
+
+export function validate_(dtoClass: new () => object, source: Source = "body"): RequestHandler {
   return async (req, res, next) => {
-    const dto = plainToInstance(dtoClass, req.body);
-    const errors = await validate(dto, { whitelist: true });
+    const dtoObject = plainToInstance(dtoClass, req[source]);
+    const errors = await validate(dtoObject, { whitelist: true, forbidNonWhitelisted: false });
 
     if (errors.length > 0) {
-      const messages = errors.flatMap((e) => Object.values(e.constraints ?? {}));
-      return res.status(400).json({ message: "Dati non validi", errors: messages });
+      res.status(400).json({
+        error: "ValidationError",
+        message: errors
+          .flatMap((e) => Object.values(e.constraints ?? {}))
+          .join(", "),
+      });
+      return;
     }
 
-    req.body = dto;
+    req[source] = dtoObject as never;
     next();
   };
 }
+
+export { validate_ as validate };

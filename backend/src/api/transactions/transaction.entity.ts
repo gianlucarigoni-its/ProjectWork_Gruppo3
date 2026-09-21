@@ -1,26 +1,11 @@
-import { Types } from "mongoose";
+export type MovementType = "Entrata" | "Uscita";
 
-export type Transaction = {
+export interface Movement {
   id: string;
-  accountId: Types.ObjectId;
-  amount: number; //importo movimento
-  description: string;
-  category: TransactionCategory;
-  type: TransactionType;
-  date: Date;
-};
-
-export enum TransactionCategory {
-  AccountOpening = "accountOpening",
-  IncomingTransfer = "incomingTransfer",
-  OutgoingTransfer = "outgoingTransfer",
-  CashWithdrawal = "cashWithdrawal",
-  UtilityPayment = "utilityPayment",
-  TopUp = "topUp",
-  AtmDeposit = "atmDeposit",
-}
-
-export enum TransactionType {
-  Income = "income",
-  Outcome = "outcome",
+  account: string; // ref -> Account
+  data: Date;
+  tipo: MovementType;
+  importo: number;
+  saldo: number; // saldo risultante dopo il movimento
+  descrizioneEstesa: string;
 }

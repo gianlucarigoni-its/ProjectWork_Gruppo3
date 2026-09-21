@@ -1,9 +1,9 @@
-import { IsEmail, IsNotEmpty, IsString, Matches, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, MinLength, Matches } from "class-validator";
 import { Match } from "../../lib/match.decorator";
 
 export class RegisterDto {
   @IsEmail({}, { message: "Email non valida" })
-  email!: string;
+  username!: string;
 
   @IsString()
   @MinLength(8, { message: "La password deve contenere almeno 8 caratteri" })
@@ -18,16 +18,16 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty({ message: "Nome titolare obbligatorio" })
-  nomeTitolare!: string;
+  firstName!: string;
 
   @IsString()
   @IsNotEmpty({ message: "Cognome titolare obbligatorio" })
-  cognomeTitolare!: string;
+  lastName!: string;
 }
 
 export class LoginDto {
   @IsEmail({}, { message: "Email non valida" })
-  email!: string;
+  username!: string;
 
   @IsString()
   @IsNotEmpty({ message: "Password obbligatoria" })

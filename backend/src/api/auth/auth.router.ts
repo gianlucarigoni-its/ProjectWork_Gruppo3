@@ -1,10 +1,12 @@
 import { Router } from "express";
-import { registra, confermaRegistrazione, login } from "./auth.service";
+import { validate } from "../../utils/validation-middleware";
+import { LoginDto, RegisterDto } from "./auth.dto";
+import { register, login, confirmRegistration } from "./auth.controller";
 
 const router = Router();
 
-router.post("/registrer", registra);
-router.get("/confirm/:token", confermaRegistrazione);
-router.post("/login", login);
+router.post("/register", validate(RegisterDto, "body"), register);
+router.get("/confirm/:token", confirmRegistration);
+router.post("/login", validate(LoginDto, "body"), login);
 
 export default router;
