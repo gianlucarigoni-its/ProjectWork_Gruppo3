@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { find } from "./transaction.controller";
 
-const router = Router({ mergeParams: true });
+const router = Router();
 
-router.use("/", find);
+router.get("/", find);
 
 export default router;
