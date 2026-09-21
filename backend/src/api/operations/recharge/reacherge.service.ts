@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import { BankAccountModel } from '../accounts/accounts.model'; // Corretto typo BankAccountModel
-import { AccountTransictionModel } from '../transictions/transiction.model';
-import { TransactionCategory, TransactionType } from '../transictions/transiction.entity';
+import { AccountModel } from '../accounts/accounts.model'; // Corretto typo BankAccountModel
+import { TransactionModel } from '../transactions/transaction.model';
+import { TransactionCategory, TransactionType } from '../transactions/transaction.entity';
 import { AuditLogModel } from '../auditLog/audit-log.schema';
 
 export class RicaricaService {
@@ -16,7 +16,7 @@ export class RicaricaService {
         session.startTransaction();
 
         try {
-            const account = await BankAccountModel.findById(accountId).session(session);
+            const account = await AccountModel.findById(accountId).session(session);
             if (!account) {
                 throw new Error('Account non trovato');
             }
@@ -36,7 +36,7 @@ export class RicaricaService {
             await account.save({ session });
 
             // Creazione Movimento (Usa accountId come da Schema)
-            const [transaction] = await AccountTransictionModel.create(
+            const [transaction] = await TransactionModel.create(
                 [{
                     accountId: account._id,
                     amount,
