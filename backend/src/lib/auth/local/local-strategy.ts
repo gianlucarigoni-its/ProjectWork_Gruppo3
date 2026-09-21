@@ -1,32 +1,39 @@
+import { Strategy as LocalStrategy } from "passport-local";
+import * as bcrypt from "bcrypt";
 import passport from "passport";
-import { Strategy as LocalStrategy } from 'passport-local';
 import { UserIdentityModel } from "./user-identity.model";
-import * as bcrypt from 'bcrypt';
+import { Account } from "../../../modules/account/accounts.entity";
 
-passport.use('local', new LocalStrategy(
-  {
-    usernameField: 'username',
-    passwordField: 'password'
-  },
-  async function(username, password, done) {
-    try {
-      const identity = await UserIdentityModel.findOne({ 'credentials.username': username});
-      // non trovo l'utente
-      if (!identity) {
-        return done(null, false, { message: `username ${username} not found` });
+passport.use(
+  new LocalStrategy(
+    { usernameField: "username", passwordField: "password" },
+    async (username, password, done) => {
+      try {
+        const identity = await UserIdentityModel.findOne({
+          "credentials.username": username.toLowerCase(),
+        }).populate<{ user: Account }>("user");
+
+        if (!identity) {
+          return done(null, false, { message: "Email o password non corretti" });
+        }
+
+        const passwordMatches = await bcrypt.compare(password, identity.credentials.hashedPassword);
+        if (!passwordMatches) {
+          return done(null, false, { message: "Email o password non corretti" });
+        }
+
+        if (!identity.credentials.isConfirmed) {
+          return done(null, false, {
+            message: "Devi confermare la registrazione tramite l'email ricevuta prima di accedere",
+          });
+        }
+
+        return done(null, identity.user);
+      } catch (err) {
+        return done(err);
       }
-
-      const match = await bcrypt.compare(password, identity.credentials.hashedPassword);
-      if (!match) {
-        return done(null, false, { message: 'invalid password' });
-      }
-
-      const user = identity.toObject().user;
-
-      done(null, user);
-
-    } catch(err) {
-      done(err);
-    }
-  })
+    },
+  ),
 );
+
+export default passport;

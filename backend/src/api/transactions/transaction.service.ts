@@ -71,4 +71,4 @@ export class transactionService {
   }
 }
 
-export default new transactionService();
+export default new MovementService();
