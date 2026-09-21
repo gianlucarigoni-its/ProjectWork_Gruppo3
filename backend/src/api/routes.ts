@@ -1,12 +1,12 @@
 import { Router } from "express";
 import accountsRouter from "./accounts/accounts.router";
-import { RicaricaController } from "../api/ricarica/ricarica.controller";
+import operationsRouter from "./operations/operations.router";
 import { authMiddleware } from "../middleware/auth-middleware";
-import { BonificoController } from "./ricarica/bonifco.controller";
 
 const apiRouter = Router();
 
-apiRouter.post("/operations/recharge", authMiddleware, RicaricaController.handleRicarica);
-apiRouter.post("/operations/transfer", authMiddleware, BonificoController.handleBonifico);
+apiRouter.use(authMiddleware);
+apiRouter.use("/accounts", accountsRouter);
+apiRouter.use("/operations", operationsRouter);
 
 export default apiRouter;
