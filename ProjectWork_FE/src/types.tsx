@@ -1,57 +1,80 @@
-export const TypeCategory = {
-  ENTRATA: 'Entrata',
-  USCITA: 'Uscita',
-} as const;
-
-export const TransitionCategory = {
-  APERTURA_CONTO: 'Apertura Conto',
-  BONIFICO_ENTRATA: 'Bonifico Entrata',
-  BONIFICO_USCITA: 'Bonifico Uscita',
-  PRELIEVO_CONTANTI: 'Prelievo contanti',
-  PAGAMENTO_UTENZE: 'Pagamento Utenze',
-  RICARICA: 'Ricarica',
-  VERSAMENTO_BANCOMAT: 'Versamento Bancomat',
-} as const;
-
-export type TypeCategory = (typeof TypeCategory)[keyof typeof TypeCategory];
-export type TransitionCategory = (typeof TransitionCategory)[keyof typeof TransitionCategory];
-
-export interface Account {
+export interface ContoCorrente {
   id: string;
-  username: string;
-  firstName: string;
-  lastname: string;
-  IBAN: string;
-  balance: number;
-  createdAt: string;
+  email: string;
+  nomeTitolare: string;
+  cognomeTitolare: string;
+  saldoAttuale: number;
+  iban?: string;
+  createdAt?: string;
 }
 
-export interface Transition {
-  id: string;
-  accountId: string;
-  amount: number;
-  description: string;
-  category: TransitionCategory;
-  type: TypeCategory;
-  date: string;
+export interface Movimento {
+  _id?: string;
+  id?: string;
+  data: string;
+  descrizioneEstesa: string;
+  importo: number;
+  saldo: number;
+  categoria?: string;
+  tipologia?: string;
 }
 
-// DTO per i Form di Input
+export interface HomeData {
+  benvenuto: string;
+  saldo: number;
+  ultimiMovimenti: Movimento[];
+}
+
+export interface MovimentoDettaglio {
+  _id: string;
+  contoCorrenteId: string;
+  data: string;
+  descrizioneEstesa: string;
+  categoriaMovimentoId?: {
+    nomeCategoria: string;
+    tipologia: string;
+  };
+  importo: number;
+  saldo: number;
+}
+
+export interface LoginResponse {
+  token: string;
+  nomeTitolare: string;
+  cognomeTitolare: string;
+}
+
 export interface RegisterDTO {
-  username: string;
-  password?: string;
-  firstName: string;
-  lastname: string;
+  email: string;
+  password: string;
+  confermaPassword: string;
+  nomeTitolare: string;
+  cognomeTitolare: string;
 }
 
-export interface RicaricaDTO {
-  phoneNumber: string;
-  operator: string;
-  amount: number;
+export interface LoginDTO {
+  email: string;
+  password: string;
 }
 
-export interface BonificoDTO {
-  recipientIBAN: string;
-  amount: number;
-  description: string;
+export interface RigaMovimento {
+  _id?: string;
+  id?: string;
+  data: string;
+  importo: number;
+  categoriaMovimentoId?: {
+    _id?: string;
+    nomeCategoria: string;
+    tipologia?: string;
+  };
+}
+
+export interface Categoria {
+  _id: string;
+  nomeCategoria: string;
+}
+
+export interface RisultatoRicerca {
+  saldo?: number;
+  movimenti: RigaMovimento[];
 }

@@ -1,32 +1,34 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { HomePage } from './components/pages/Home'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { useAuth } from './context/authContext';
+import RegisterPage from './components/pages/RegisterPage';
+import LoginPage from './components/pages/loginPage';
+import HomePage from './components/pages/HomePage';
+import MovimentoDettaglioPage from './components/pages/MovimentoDettaglioPage';
+import ConfermaPage from './components/pages/ConfermaPage';
+import RicercaMovimentiPage from './components/pages/RicercaMovimentiPage';
+import ModificaPasswordPage from './components/pages/ModificaPasswordPage';
+
+function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <div>Caricamento...</div>;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Rotta principale per la Home */}
-        <Route path="/home" element={<HomePage />} />
-
-        {/* Redirect automatico dalla radice "/" a "/home" */}
-        <Route path="/" element={<Navigate to="/home" replace />} />
-
-        {/* Rotta temporanea per il dettaglio movimento (richiesta dal Project Work) */}
-        <Route
-          path="/movimento/:id"
-          element={
-            <div className="container mt-4">
-              <h2>Dettaglio Movimento</h2>
-              <p>Schermata dettaglio in fase di sviluppo...</p>
-            </div>
-          }
-        />
-
-        {/* Fallback per percorsi non riconosciuti */}
-        <Route path="*" element={<Navigate to="/home" replace />} />
-      </Routes>
-    </BrowserRouter>
-  )
+    <Routes>
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/conferma/:token" element={<ConfermaPage />} />
+      <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+      <Route path="/movimento/:id" element={<ProtectedRoute><MovimentoDettaglioPage /></ProtectedRoute>} />
+      <Route path="/ricerca/:tipo" element={<ProtectedRoute><RicercaMovimentiPage /></ProtectedRoute>} />
+      <Route path="/modifica-password" element={<ProtectedRoute><ModificaPasswordPage /></ProtectedRoute>} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;

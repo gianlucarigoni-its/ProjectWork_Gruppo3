@@ -1,85 +1,68 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api, tokenService } from '../utils/services/api';
+import type { LoginResponse } from '../types';
 
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  picture: string;
-  fullName: string;
-  role:'admin' | 'user';
-  
+interface Utente {
+  nomeTitolare: string;
+  cognomeTitolare: string;
 }
 
 interface AuthContextType {
-  currentUser: User | null;
+  currentUser: Utente | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<User>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  fetchUser: () => Promise<User | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<Utente | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const isAuthenticated = !!currentUser;
-  const fetchUser = async (): Promise<User | null> => {
-    try {
-      const response = await api.get<User>('/users/me');
-      setCurrentUser(response.data);
-      return response.data;
-    } catch (error) {
-      tokenService.clearTokens();
-      setCurrentUser(null);
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchUser();
+    const restoreSession = async () => {
+      const token = tokenService.getToken();
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const response = await api.get('/account/home');
+        const benvenuto: string = response.data.benvenuto;
+        const nomeCompleto = benvenuto.replace('Benvenuto ', '').split(' ');
+        setCurrentUser({
+          nomeTitolare: nomeCompleto[0] || '',
+          cognomeTitolare: nomeCompleto.slice(1).join(' ') || '',
+        });
+      } catch {
+        tokenService.clearToken();
+        setCurrentUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    restoreSession();
   }, []);
 
-  const login = async (username: string, password: string): Promise<User> => {
-    const response = await api.post<{ user: User; accessToken: string; refreshToken: string }>(
-      '/login',
-      { username, password },
-      {
-        headers: {
-        'Content-Type': 'application/json',
-        },
-      }
-    );
+  const login = async (email: string, password: string): Promise<void> => {
+    const response = await api.post<LoginResponse>('/auth/login', { email, password });
+    const { token, nomeTitolare, cognomeTitolare } = response.data;
 
-    const { user, accessToken, refreshToken } = response.data;
-
-    tokenService.setTokens(accessToken, refreshToken);
-
-    setCurrentUser(user);
-    return user;
+    tokenService.setToken(token);
+    setCurrentUser({ nomeTitolare, cognomeTitolare });
   };
 
   const logout = () => {
-    tokenService.clearTokens();
+    tokenService.clearToken();
     setCurrentUser(null);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        currentUser,
-        isAuthenticated,
-        isLoading,
-        login,
-        logout,
-        fetchUser,
-      }}
-    >
+    <AuthContext.Provider value={{ currentUser, isAuthenticated, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -88,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth deve essere usato all\'interno di un AuthProvider');
+    throw new Error("useAuth deve essere usato all'interno di un AuthProvider");
   }
   return context;
 }
