@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { IsDate, IsDateString, IsEnum, IsInt, IsOptional, Min } from "class-validator";
-import { TransactionCategory, TransactionType } from "./transaction.entity";
+import { Transaction, TransactionCategory, TransactionType } from "./transaction.entity";
 import { Types } from "mongoose";
 
 export class Filter {
@@ -23,12 +23,6 @@ export class Filter {
 }
 
 export class TransactionResponse {
-  id: string;
-  accountId: Types.ObjectId;
-  amount: number;
-  description: string;
-  category: TransactionCategory;
-  type: TransactionType;
-  date: Date;
-  balance: number;
+  transactions: Transaction[];
+  balance?: number;
 }
