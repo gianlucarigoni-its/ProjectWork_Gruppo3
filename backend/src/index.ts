@@ -1,8 +1,8 @@
+import "dotenv/config";
 import "reflect-metadata";
 import { createServer } from "http";
 import app from "./app";
 import mongoose from "mongoose";
-import "dotenv/config";
 
 const dbPassword = process.env.DB_PASSWORD;
 if (!dbPassword) throw new Error("DB_PASSWORD non configurata nel file .env");
