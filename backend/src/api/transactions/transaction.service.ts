@@ -1,9 +1,8 @@
-import { queryObjects } from "node:v8";
+import { QueryFilter } from "mongoose";
+import { AccountModel } from "../accounts/accounts.model";
 import { Filter, TransactionResponse } from "./transaction.dto";
-import { QueryFilter, Types } from "mongoose";
 import { Transaction } from "./transaction.entity";
 import { TransactionModel } from "./transaction.model";
-import { AccountModel } from "../accounts/accounts.model";
 
 export class transactionService {
   async filter(filters: Filter, accountId: string): Promise<TransactionResponse> {
@@ -47,6 +46,28 @@ export class transactionService {
     else transactions = await TransactionModel.find(queryFilter).sort({ date: -1 }).limit(limit);
 
     return { transactions };
+  }
+
+  buildCsv(transactions: Transaction[], balance?: number): string {
+    const escape = (val: string) => `"${val.replace(/"/g, '""')}"`;
+
+    const header = ["Data", "Importo", "Categoria"].join(";");
+
+    const rows = transactions.map((t) =>
+      [
+        escape(new Date(t.date).toLocaleDateString("it-IT")),
+        String(t.amount).replace(".", ","),
+        escape(t.category),
+      ].join(";"),
+    );
+
+    let csv = [header, ...rows].join("\r\n");
+
+    if (balance !== undefined) {
+      csv += `\r\n\r\n"Saldo finale";${String(balance).replace(".", ",")}`;
+    }
+
+    return csv;
   }
 }
 
