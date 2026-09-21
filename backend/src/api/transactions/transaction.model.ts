@@ -5,7 +5,7 @@ const TransactionSchema = new Schema<Transaction>(
   {
     accountId: {
       type: Schema.Types.ObjectId,
-      ref: "Accounts",
+      ref: "Account",
     },
     amount: Number,
     description: String,

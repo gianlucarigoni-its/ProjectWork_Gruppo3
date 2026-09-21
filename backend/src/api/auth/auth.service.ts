@@ -7,8 +7,7 @@ import { LogAccesso } from "../../lib/models/log-accesso.model";
 import { trovaOCreaCategoria } from "../../lib/categoria.helper";
 import { sendConfirmationEmail } from "../../lib/mailer";
 import { firmaToken } from "../../lib/jwt.util";
-import { RegisterDto } from "./auth.dto";
-import { LoginDto } from "./login.dto";
+import { RegisterDto, LoginDto } from "./auth.dto";
 
 const SALT_ROUNDS = 12;
 const TOKEN_CONFERMA_VALIDITA_ORE = 24;

@@ -1,6 +1,5 @@
-export type Accounts = {
+export type Account = {
   id: string;
-  username: string;
   lastName: string;
   firstName: string;
   fullName: string;

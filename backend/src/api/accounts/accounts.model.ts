@@ -1,7 +1,7 @@
 import { Model, model, Schema } from "mongoose";
-import { Accounts } from "./accounts.entity";
+import { Account } from "./accounts.entity";
 
-const AccountSchema = new Schema<Accounts>(
+const AccountSchema = new Schema<Account>(
   {
     username: String,
     firstName: String,
@@ -39,4 +39,4 @@ AccountSchema.set("toObject", {
   },
 });
 
-export const AccountModel = model<Accounts>("Accounts", AccountSchema);
+export const AccountModel = model<Account>("Account", AccountSchema);

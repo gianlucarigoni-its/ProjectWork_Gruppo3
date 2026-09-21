@@ -24,3 +24,12 @@ export class RegisterDto {
   @IsNotEmpty({ message: "Cognome titolare obbligatorio" })
   cognomeTitolare!: string;
 }
+
+export class LoginDto {
+  @IsEmail({}, { message: "Email non valida" })
+  email!: string;
+
+  @IsString()
+  @IsNotEmpty({ message: "Password obbligatoria" })
+  password!: string;
+}
