@@ -6,18 +6,11 @@ import { RegisterDto } from "./auth.dto";
 import accountSrv from "../accounts/account.service";
 import { UserExistsError } from "../../errors/user-exists.error";
 
-export const register = async (
-  req: TypedRequest<RegisterDto>,
-  res: Response,
-  next: NextFunction,
-) => {
+export const register = async (req: TypedRequest<RegisterDto>, res: Response, next: NextFunction) => {
   try {
     const { username, password, firstName, lastName } = req.body;
 
-    const newAccount = await accountSrv.add(
-      { username, firstName, lastName },
-      { username, password },
-    );
+    const newAccount = await accountSrv.add({ firstName, lastName }, { username, password });
 
     res.json({
       message: "Registrazione effettuata. Ora puoi accedere.",
@@ -50,11 +43,9 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
           return;
         }
 
-        const token = jwt.sign(
-          { sub: (user as { id: string }).id },
-          process.env.JWT_SECRET as string,
-          { expiresIn: "7 days" },
-        );
+        const token = jwt.sign({ sub: (user as { id: string }).id }, process.env.JWT_SECRET as string, {
+          expiresIn: "7 days",
+        });
 
         res.json({ user, token });
       },
