@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
 import passport from "../../lib/auth/local/local-strategy";
-import { TypedRequest } from "../../utils/typed-request.interface";
+import { TypedRequest } from "../../lib/typed-request.interface";
 import { RegisterDto } from "./auth.dto";
 import accountSrv from "../accounts/account.service";
 import { UserExistsError } from "../../errors/user-exists.error";

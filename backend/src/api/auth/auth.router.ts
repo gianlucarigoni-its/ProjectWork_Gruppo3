@@ -1,11 +1,13 @@
 import { Router } from "express";
-import { validate } from "../../lib/validate-body.middleware";
+import { validate } from "../../lib/validation-middleware";
+import { login, register } from "./auth.controller";
 import { LoginDto, RegisterDto } from "./auth.dto";
-import { register, login } from "./auth.controller";
+import { isAuthenticated } from "../../lib/auth/authenticated.middleware";
 
 const router = Router();
 
-router.post('/register', validate(RegisterDto, 'body'), register);
-router.post('/login', validate(LoginDto, 'body'), login);
+router.post("/register", validate(RegisterDto, "body"), register);
+router.post("/login", validate(LoginDto, "body"), login);
+//router.patch("/password", isAuthenticated, validate())
 
 export default router;

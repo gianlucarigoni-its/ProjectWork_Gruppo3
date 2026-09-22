@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { TypedRequest } from "../../utils/typed-request.interface";
+import { TypedRequest } from "../../lib/typed-request.interface";
 import { Download, Filter } from "./transaction.dto";
 import transactionSrv from "./transaction.service";
 
