@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './home.css';
+import { BonificoButton } from '../../components/BonificoButton';
 
 interface Account {
   id?: string;
@@ -32,22 +33,32 @@ export const HomePage: React.FC = () => {
   const [data, setData] = useState<HomeDashboardData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const fetchDashBoardData = () => {
+        const token = localStorage.getItem('token');
+        fetch('http://localhost:3000/api/home' ,{
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then((res) => {
+                if(!res.ok) {
+                    throw new Error(`Errore HTTP ${res.status}`);
+                }
+                return res.json();
+            })
+            .then((dashboardData : HomeDashboardData) => {
+                setData(dashboardData);
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error('Errore nel recupero dati:', err);
+                setLoading(false);
+            });
+
+  };
+
   useEffect(() => {
-    fetch('http://localhost:3000/api/home')
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Errore HTTP ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data: HomeDashboardData) => {
-        setData(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Errore nel recupero dati:', err);
-        setLoading(false);
-      });
+    fetchDashBoardData();
   }, []);
 
   if (loading) {
@@ -81,6 +92,10 @@ export const HomePage: React.FC = () => {
           <span className="iban-value">{account.IBAN || 'In fase di assegnazione'}</span>
         </div>
       </header>
+
+      {/* MODALE CON BUTTON BONIFICO */}
+
+        <BonificoButton onTransactionComplete={fetchDashBoardData} />
 
       {/* Scheda Saldo */}
       <section className="cards-grid">
