@@ -8,7 +8,7 @@ import { UserExistsError } from "../../errors/user-exists.error";
 
 export const register = async (req: TypedRequest<RegisterDto>, res: Response, next: NextFunction) => {
   try {
-    const { username, password, confermaPassword, firstName, lastName } = req.body;
+    const { username, password, firstName, lastName } = req.body;
 
     const newAccount = await accountSrv.add({ firstName, lastName }, { username, password });
 

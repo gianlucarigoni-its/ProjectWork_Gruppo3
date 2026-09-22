@@ -4,6 +4,7 @@ import { UserIdentityModel } from "../../lib/auth/local/user-identity.model";
 import { Account } from "./accounts.entity";
 import { AccountModel } from "./accounts.model";
 import { generateRandomIban } from "../../lib/iban-generator";
+import { nextTick } from "node:process";
 
 export class AccountService {
   async add(
@@ -49,7 +50,6 @@ export class AccountService {
         session.endSession();
       }
     } catch (err) {
-      console.error("ERRORE IN accountSrv.add:", err);
       throw err;
     }
   }
