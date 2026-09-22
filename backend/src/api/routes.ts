@@ -1,13 +1,15 @@
 import { Router } from "express";
-import accountsRouter from "./accounts/account.router";
-import operationsRouter from "./operations/operations.router";
-import authRouter from "./auth/auth.router";
 import { isAuthenticated } from "../lib/auth/authenticated.middleware";
+import accountsRouter from "./accounts/account.router";
+import authRouter from "./auth/auth.router";
+import operationsRouter from "./operations/operations.router";
+import transactionsRouter from "./transactions/transaction.router";
 const apiRouter = Router();
 
 apiRouter.use("/auth", authRouter);
 apiRouter.use(isAuthenticated);
 apiRouter.use("/accounts", accountsRouter);
+apiRouter.use("/transactions", transactionsRouter);
 apiRouter.use("/operations", operationsRouter);
 
 export default apiRouter;

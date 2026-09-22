@@ -4,7 +4,7 @@ import { home } from "./account.controller";
 
 const router = Router({ mergeParams: true });
 
-router.use("/:accountId/transactions", transactionsRouter);
+//router.use("/:accountId");
 router.get("/home", home);
 
 export default router;
