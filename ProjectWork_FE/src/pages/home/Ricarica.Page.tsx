@@ -89,7 +89,7 @@ export const RicaricaForm: React.FC<{
         <input
           id="phoneNumber"
           type="tel"
-          placeholder="es. 333 123 4567"
+          placeholder="Inserire numero di telefono..."
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
           className="form-input"
