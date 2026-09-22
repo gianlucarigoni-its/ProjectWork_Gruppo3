@@ -2,7 +2,7 @@ import { Schema, model, Types } from "mongoose";
 import { UserIdentity } from "./user-identity.entity";
 
 export const userIdentitySchema = new Schema<UserIdentity>({
-  user: { type: Schema.Types.ObjectId, ref: "User" },
+  user: { type: Schema.Types.ObjectId, ref: "Account" },
   provider: { type: String, default: "local" },
   credentials: {
     type: {
