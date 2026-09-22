@@ -6,6 +6,7 @@ import { TransactionModel } from "./transaction.model";
 import { IncomingHttpHeaders } from "node:http";
 import { Socket, SocketAddress } from "node:net";
 import { AuditLogModel } from "../auditLog/audit-log.schema";
+import { forEach } from "lodash";
 
 export class TransactionService {
   async filter(filters: Filter, accountId: string): Promise<TransactionResponse> {
@@ -101,7 +102,7 @@ export class TransactionService {
         await AuditLogModel.create(
           [
             {
-              transictionID: null,
+              transactionID: null,
               operationType: "BONIFICO",
               ipAddress: clientIp,
               status: "FAILED",
@@ -123,7 +124,7 @@ export class TransactionService {
         await AuditLogModel.create(
           [
             {
-              transictionID: null,
+              transactionID: null,
               operationType: "BONIFICO",
               ipAddress: clientIp,
               status: "FAILED",
@@ -146,7 +147,7 @@ export class TransactionService {
         await AuditLogModel.create(
           [
             {
-              transictionID: null,
+              transactionID: null,
               operationType: "BONIFICO",
               ipAddress: clientIp,
               status: "FAILED",
@@ -201,7 +202,7 @@ export class TransactionService {
       await AuditLogModel.create(
         [
           {
-            transictionID: outgoingTransaction._id,
+            transactionID: outgoingTransaction._id,
             operationType: "BONIFICO",
             ipAddress: clientIp,
             status: "SUCCESS",
@@ -220,6 +221,82 @@ export class TransactionService {
     } catch (err) {
       await session.abortTransaction();
       throw err;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  async executeTopUp(accountId: string, clientIp: string, phoneNumber: string, operator: string, amount: number) {
+    const session = await TransactionModel.startSession();
+    session.startTransaction();
+
+    try {
+      const account = await AccountModel.findById(accountId).session(session);
+      if (!account) {
+        throw new Error("Account non trovato");
+      }
+
+      // Controllo saldo
+      if (account.balance < amount) {
+        await AuditLogModel.create(
+          [
+            {
+              transactionID: null,
+              operationType: "RICARICA",
+              ipAddress: clientIp,
+              status: "FAILED",
+              failureReason: "Saldo insufficiente",
+            },
+          ],
+          { session },
+        );
+        await session.commitTransaction();
+        return { success: false, statusCode: 400, message: "Saldo insufficiente per la ricarica." };
+      }
+
+      // Aggiornamento Saldo
+      account.balance -= amount;
+      await account.save({ session });
+
+      // Creazione Movimento (Usa accountId come da Schema)
+      const transaction = await TransactionModel.create(
+        [
+          {
+            accountId: account._id,
+            amount,
+            description: `Ricarica ${operator} - Num. ${phoneNumber}`,
+            category: TransactionCategory.TopUp,
+            type: TransactionType.Outcome,
+          },
+        ],
+        { session },
+      );
+
+      let transactionId;
+
+      for (let index = 0; index < transaction.length; index++) {
+        transactionId = transaction[index].id;
+        if (index == 0) break;
+      }
+
+      // Audit Log di Successo
+      await AuditLogModel.create(
+        [
+          {
+            transactionID: transactionId,
+            operationType: "RICARICA",
+            ipAddress: clientIp,
+            status: "SUCCESS",
+          },
+        ],
+        { session },
+      );
+
+      await session.commitTransaction();
+      return { success: true, statusCode: 200, newBalance: account.balance, transaction };
+    } catch (error: any) {
+      await session.abortTransaction();
+      throw error;
     } finally {
       session.endSession();
     }

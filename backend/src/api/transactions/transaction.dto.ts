@@ -51,6 +51,18 @@ export class TransferDto {
   amount: number;
 }
 
+export class TopUpDto {
+  @IsString()
+  phoneNumber: string;
+
+  @IsString()
+  operator: string;
+
+  @Type(() => Number)
+  @IsInt()
+  amount: number;
+}
+
 export class TransactionResponse {
   transactions: Transaction[];
   balance?: number;

@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { TypedRequest } from "../../lib/typed-request.interface";
-import { Download, Filter, TransferDto } from "./transaction.dto";
+import { Download, Filter, TopUpDto, TransferDto } from "./transaction.dto";
 import transactionSrv from "./transaction.service";
 import { IsIBAN } from "class-validator";
 
@@ -54,6 +54,18 @@ export const transfer = async (req: TypedRequest<TransferDto>, res: Response, ne
   }
 };
 
-// export const topUp(req:TypedRequest, res:Response, next: NextFunction){
+export const topUp = async (req: TypedRequest<TopUpDto>, res: Response, next: NextFunction) => {
+  try {
+    const clientIp = transactionSrv.getClientIp(req.headers, req.socket, req.ip);
 
-// }
+    const result = await transactionSrv.executeTopUp(
+      req.account.id,
+      clientIp,
+      req.body.phoneNumber,
+      req.body.operator,
+      req.body.amount,
+    );
+  } catch (err) {
+    next(err);
+  }
+};
