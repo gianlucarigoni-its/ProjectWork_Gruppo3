@@ -1,11 +1,8 @@
-import { User as AppUser } from "../../api/user/user.entity";
+import { Account } from "../../api/accounts/accounts.entity";
 import './local/local-strategy';
-import './jwt/jwt-strategy';
 
 declare global {
   namespace Express {
-    interface User extends AppUser {
-
-    }
+    interface User extends Account {}
   }
 }
