@@ -10,34 +10,48 @@ export class AccountService {
     account: Omit<Account, "id" | "username" | "IBAN" | "balance" | "createdAt">,
     credentials: { username: string; password: string },
   ): Promise<Account> {
-    const existingIdentity = await UserIdentityModel.findOne({
-      "credentials.username": credentials.username,
-    });
-    if (existingIdentity) {
-      throw new UserExistsError();
+    try {
+      const existingIdentity = await UserIdentityModel.findOne({
+        "credentials.username": credentials.username,
+      });
+      if (existingIdentity) throw new UserExistsError();
+
+      const session = await AccountModel.startSession();
+      session.startTransaction();
+
+      try {
+        const iban = generateRandomIban("IT");
+
+        const [newAccount] = await AccountModel.create(
+          [{ ...account, username: credentials.username, IBAN: iban, balance: 0 }],
+          { session },
+        );
+
+        const hashedPassword = await bcrypt.hash(credentials.password, 10);
+
+        await UserIdentityModel.create(
+          [
+            {
+              provider: "local",
+              user: newAccount._id.toString(),
+              credentials: { username: credentials.username, hashedPassword },
+            },
+          ],
+          { session },
+        );
+
+        await session.commitTransaction();
+        return newAccount;
+      } catch (err) {
+        await session.abortTransaction();
+        throw err;
+      } finally {
+        session.endSession();
+      }
+    } catch (err) {
+      console.error("ERRORE IN accountSrv.add:", err);
+      throw err;
     }
-
-    const iban = generateRandomIban("IT");
-
-    const newAccount = await AccountModel.create({
-      ...account,
-      username: credentials.username,
-      IBAN: iban,
-      balance: 0,
-    });
-
-    const hashedPassword = await bcrypt.hash(credentials.password, 10);
-
-    await UserIdentityModel.create({
-      provider: "local",
-      user: newAccount.toObject().id.toString(),
-      credentials: {
-        username: credentials.username,
-        hashedPassword,
-      },
-    });
-
-    return newAccount;
   }
 }
 

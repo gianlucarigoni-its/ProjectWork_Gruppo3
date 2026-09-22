@@ -10,4 +10,21 @@ const accountSchema = new Schema<Account>({
   createdAt: { type: Date, required: true, default: Date.now },
 });
 
+accountSchema.set("toJSON", {
+  virtuals: true,
+  transform: (_, ret: any) => {
+    delete ret._id;
+    delete ret.__v;
+    return ret;
+  },
+});
+
+accountSchema.set("toObject", {
+  virtuals: true,
+  transform: (_, ret: any) => {
+    delete ret._id;
+    delete ret.__v;
+    return ret;
+  },
+});
 export const AccountModel = model<Account>("Account", accountSchema);
