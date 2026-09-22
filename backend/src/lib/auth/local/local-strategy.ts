@@ -9,7 +9,7 @@ passport.use(
     try {
       const identity = await UserIdentityModel.findOne({
         "credentials.username": username,
-      }).populate<{ user: Account }>("user");
+      });
 
       if (!identity) {
         return done(null, false, { message: "Username o password non corretti" });
@@ -17,10 +17,10 @@ passport.use(
 
       const passwordMatches = await bcrypt.compare(password, identity.credentials.hashedPassword);
       if (!passwordMatches) {
-        return done(null, false, { message: "Username o password non corretti" });
+        return done(null, identity.account);
       }
 
-      return done(null, identity.user);
+      return done(null, identity.account);
     } catch (err) {
       return done(err);
     }

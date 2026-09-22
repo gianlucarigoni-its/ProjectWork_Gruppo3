@@ -4,9 +4,8 @@ import { Filter, TransactionResponse } from "./transaction.dto";
 import { Transaction, TransactionCategory, TransactionType } from "./transaction.entity";
 import { TransactionModel } from "./transaction.model";
 import { IncomingHttpHeaders } from "node:http";
-import { Socket, SocketAddress } from "node:net";
-import { AuditLogModel } from "../auditLog/audit-log.schema";
-import { forEach } from "lodash";
+import { Socket } from "node:net";
+import { TransactionLogModel } from "./transacition-log.model";
 
 export class TransactionService {
   async filter(filters: Filter, accountId: string): Promise<TransactionResponse> {
@@ -99,10 +98,10 @@ export class TransactionService {
 
       // 2. Controllo bonifico verso se stessi
       if (sender.IBAN === IBAN) {
-        await AuditLogModel.create(
+        await TransactionLogModel.create(
           [
             {
-              transactionID: null,
+              transactionId: null,
               operationType: "BONIFICO",
               ipAddress: clientIp,
               status: "FAILED",
@@ -121,10 +120,10 @@ export class TransactionService {
 
       // 3. Verifica disponibilità saldo mittente
       if (sender.balance < amount) {
-        await AuditLogModel.create(
+        await TransactionLogModel.create(
           [
             {
-              transactionID: null,
+              transactionId: null,
               operationType: "BONIFICO",
               ipAddress: clientIp,
               status: "FAILED",
@@ -144,10 +143,10 @@ export class TransactionService {
       // 4. Verifica esistenza IBAN destinatario
       const recipient = await AccountModel.findOne({ IBAN: IBAN }).session(session);
       if (!recipient) {
-        await AuditLogModel.create(
+        await TransactionLogModel.create(
           [
             {
-              transactionID: null,
+              transactionId: null,
               operationType: "BONIFICO",
               ipAddress: clientIp,
               status: "FAILED",
@@ -199,10 +198,10 @@ export class TransactionService {
       );
 
       // 8. Audit Log di successo collegato all'ID del transfer
-      await AuditLogModel.create(
+      await TransactionLogModel.create(
         [
           {
-            transactionID: outgoingTransaction._id,
+            transactionId: outgoingTransaction._id,
             operationType: "BONIFICO",
             ipAddress: clientIp,
             status: "SUCCESS",
@@ -238,10 +237,10 @@ export class TransactionService {
 
       // Controllo saldo
       if (account.balance < amount) {
-        await AuditLogModel.create(
+        await TransactionLogModel.create(
           [
             {
-              transactionID: null,
+              transactionId: null,
               operationType: "RICARICA",
               ipAddress: clientIp,
               status: "FAILED",
@@ -273,10 +272,10 @@ export class TransactionService {
       );
 
       // Audit Log di Successo
-      await AuditLogModel.create(
+      await TransactionLogModel.create(
         [
           {
-            transactionID: transaction._id,
+            transactionId: transaction._id,
             operationType: "RICARICA",
             ipAddress: clientIp,
             status: "SUCCESS",

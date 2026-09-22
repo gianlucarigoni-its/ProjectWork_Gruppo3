@@ -1,7 +1,7 @@
 import { Schema, model, Types } from "mongoose";
 
-export type AuditLog = {
-  transactionID?: Types.ObjectId | null;
+export type TransactionLog = {
+  transactionId?: Types.ObjectId | null;
   operationType: "RICARICA" | "BONIFICO";
   ipAddress: string;
   status: "SUCCESS" | "FAILED";
@@ -9,9 +9,9 @@ export type AuditLog = {
   date?: Date;
 };
 
-const AuditLogSchema = new Schema<AuditLog>(
+const TransactionLogSchema = new Schema<TransactionLog>(
   {
-    transictionID: {
+    transactionId: {
       type: Schema.Types.ObjectId,
       ref: "Transaction",
       required: false,
@@ -40,7 +40,7 @@ const AuditLogSchema = new Schema<AuditLog>(
   },
 );
 
-AuditLogSchema.set("toJSON", {
+TransactionLogSchema.set("toJSON", {
   virtuals: true,
   transform: (_, ret: any) => {
     delete ret._id;
@@ -49,7 +49,7 @@ AuditLogSchema.set("toJSON", {
   },
 });
 
-AuditLogSchema.set("toObject", {
+TransactionLogSchema.set("toObject", {
   virtuals: true,
   transform: (_, ret: any) => {
     delete ret._id;
@@ -58,4 +58,4 @@ AuditLogSchema.set("toObject", {
   },
 });
 
-export const AuditLogModel = model<AuditLog>("AuditLog", AuditLogSchema);
+export const TransactionLogModel = model<TransactionLog>("TransactionLog", TransactionLogSchema);

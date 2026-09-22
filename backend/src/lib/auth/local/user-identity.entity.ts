@@ -7,5 +7,5 @@ export type UserIdentity = {
     username: string;
     hashedPassword: string;
   };
-  user: Types.ObjectId | string;
+  account: Types.ObjectId | string;
 };
