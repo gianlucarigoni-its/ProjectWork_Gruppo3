@@ -1,13 +1,13 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from './context/authContext';
-import RegisterPage from './components/pages/RegisterPage';
+import RegisterPage from './pages/home/RegisterPage';
 import LoginPage from './components/pages/loginPage';
-import HomePage from './components/pages/HomePage';
-import MovimentoDettaglioPage from './components/pages/MovimentoDettaglioPage';
-import ConfermaPage from './components/pages/ConfermaPage';
-import RicercaMovimentiPage from './components/pages/RicercaMovimentiPage';
-import ModificaPasswordPage from './components/pages/ModificaPasswordPage';
+import HomePage from './pages/home/HomePage';
+import MovimentoDettaglioPage from './pages/home/MovimentoDettaglioPage';
+import ConfermaPage from './pages/home/ConfermaPage';
+import RicercaMovimentiPage from './pages/home/RicercaMovimentiPage';
+import ModificaPasswordPage from './pages/home/ModificaPasswordPage';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
