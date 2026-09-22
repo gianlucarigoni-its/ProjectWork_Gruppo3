@@ -1,12 +1,17 @@
 import * as bcrypt from "bcrypt";
 import { UserExistsError } from "../../errors/user-exists.error";
 import { UserIdentityModel } from "../../lib/auth/local/user-identity.model";
-import { Account } from "./accounts.entity";
-import { AccountModel } from "./accounts.model";
+import { Account } from "./account.entity";
+import { AccountModel } from "./account.model";
 import { generateRandomIban } from "../../lib/iban-generator";
-import { nextTick } from "node:process";
+import transactionSrv from "../transactions/transaction.service";
 
 export class AccountService {
+  async getAccountById(id: string): Promise<Account> {
+    const account = await AccountModel.findById(id).exec();
+    return account!.toObject();
+  }
+
   async add(
     account: Omit<Account, "id" | "username" | "IBAN" | "balance" | "createdAt">,
     credentials: { username: string; password: string },
@@ -52,6 +57,16 @@ export class AccountService {
     } catch (err) {
       throw err;
     }
+  }
+
+  async getHome(id: string, limit?: number) {
+    const account = await this.getAccountById(id);
+    const transactions = await transactionSrv.getTransactions(id, limit);
+
+    return {
+      account,
+      transactions,
+    };
   }
 }
 

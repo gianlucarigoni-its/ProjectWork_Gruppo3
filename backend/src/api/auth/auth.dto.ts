@@ -1,5 +1,4 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength, Matches } from "class-validator";
-import { Match } from "../../lib/match.decorator";
 
 export class RegisterDto {
   @IsEmail({}, { message: "Email non valida" })
@@ -13,7 +12,6 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty({ message: "Conferma password obbligatoria" })
-  @Match("password", { message: "Le password non coincidono" })
   confermaPassword!: string;
 
   @IsString()

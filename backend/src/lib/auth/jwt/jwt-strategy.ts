@@ -1,6 +1,6 @@
 import passport from "passport";
 import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
-import { AccountModel } from "../../../api/accounts/accounts.model";
+import { AccountModel } from "../../../api/accounts/account.model";
 
 passport.use(
   new JwtStrategy(

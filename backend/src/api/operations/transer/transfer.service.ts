@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { AccountModel } from "../../accounts/accounts.model";
+import { AccountModel } from "../../accounts/account.model";
 import { TransactionModel } from "../../transactions/transaction.model";
 import { TransactionCategory, TransactionType } from "../../transactions/transaction.entity";
 import { AuditLogModel } from "../../auditLog/audit-log.schema";
@@ -8,7 +8,7 @@ export class BonificoService {
   static async execute(
     senderAccountId: string,
     clientIp: string,
-    data: { recipientIBAN: string; amount: number; description?: string }
+    data: { recipientIBAN: string; amount: number; description?: string },
   ) {
     const { recipientIBAN, amount, description } = data;
     const session = await mongoose.startSession();
@@ -33,7 +33,7 @@ export class BonificoService {
               failureReason: "Bonifico verso il proprio IBAN",
             },
           ],
-          { session }
+          { session },
         );
         await session.commitTransaction();
         return {
@@ -55,7 +55,7 @@ export class BonificoService {
               failureReason: "Saldo insufficiente",
             },
           ],
-          { session }
+          { session },
         );
         await session.commitTransaction();
         return {
@@ -78,7 +78,7 @@ export class BonificoService {
               failureReason: "IBAN destinatario inesistente",
             },
           ],
-          { session }
+          { session },
         );
         await session.commitTransaction();
         return {
@@ -107,7 +107,7 @@ export class BonificoService {
             type: TransactionType.Outcome,
           },
         ],
-        { session }
+        { session },
       );
 
       // 7. Creazione movimento in ENTRATA per il destinatario
@@ -123,7 +123,7 @@ export class BonificoService {
             type: TransactionType.Income,
           },
         ],
-        { session }
+        { session },
       );
 
       // 8. Audit Log di successo collegato all'ID del transfer
@@ -136,7 +136,7 @@ export class BonificoService {
             status: "SUCCESS",
           },
         ],
-        { session }
+        { session },
       );
 
       await session.commitTransaction();

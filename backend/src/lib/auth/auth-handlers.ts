@@ -1,4 +1,4 @@
-import { Account } from "../../api/accounts/accounts.entity";
+import { Account } from "../../api/accounts/account.entity";
 import "./local/local-strategy";
 import "./jwt/jwt-strategy";
 

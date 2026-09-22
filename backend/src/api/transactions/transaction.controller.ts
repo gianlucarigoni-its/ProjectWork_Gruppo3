@@ -5,7 +5,7 @@ import transactionSrv from "./transaction.service";
 
 export const find = async (req: TypedRequest<unknown, Filter>, res: Response, next: NextFunction) => {
   try {
-    const result = await transactionSrv.filter(req.query, req.params.accountId);
+    const result = await transactionSrv.filter(req.query, req.account.id);
     res.status(200).json(result);
   } catch (err) {
     next(err);

@@ -8,7 +8,9 @@ import { UserExistsError } from "../../errors/user-exists.error";
 
 export const register = async (req: TypedRequest<RegisterDto>, res: Response, next: NextFunction) => {
   try {
-    const { username, password, firstName, lastName } = req.body;
+    const { username, password, confermaPassword, firstName, lastName } = req.body;
+
+    if (password != confermaPassword) throw new Error(); //da cambiare
 
     const newAccount = await accountSrv.add({ firstName, lastName }, { username, password });
 
@@ -25,13 +27,13 @@ export const register = async (req: TypedRequest<RegisterDto>, res: Response, ne
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    passport.authenticate("local", { session: false }, (loginErr, user, info) => {
+    passport.authenticate("local", { session: false }, (loginErr, account, info) => {
       if (loginErr) {
         next(loginErr);
         return;
       }
 
-      if (!user) {
+      if (!account) {
         res.status(401);
         res.json({
           error: "LoginError",
@@ -40,11 +42,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         return;
       }
 
-      const userObj = user.toObject();
+      const userObj = account.toObject();
       // generare token
       const token = jwt.sign(userObj, "my_jwt_secret", { expiresIn: "7 days" });
       res.json({
-        user,
+        account,
         token,
       });
     })(req, res, next);

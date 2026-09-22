@@ -1,5 +1,5 @@
 import { QueryFilter } from "mongoose";
-import { AccountModel } from "../accounts/accounts.model";
+import { AccountModel } from "../accounts/account.model";
 import { Filter, TransactionResponse } from "./transaction.dto";
 import { Transaction } from "./transaction.entity";
 import { TransactionModel } from "./transaction.model";
@@ -68,6 +68,11 @@ export class TransactionService {
     }
 
     return csv;
+  }
+
+  async getTransactions(id: string, num?: number): Promise<Transaction[]> {
+    if (!num) return await TransactionModel.find({ id: id }).exec();
+    return await TransactionModel.find({ id: id }).limit(num).sort({ date: -1 }).exec();
   }
 }
 

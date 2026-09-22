@@ -1,12 +1,10 @@
 import "dotenv/config";
 import mongoose from "mongoose";
 
-
 import { TransactionModel } from "./api/transactions/transaction.model";
 
-
 // Modifica l'import se hai rinominato il file/modello
-import { AccountModel } from "./api/accounts/accounts.model"; 
+import { AccountModel } from "./api/accounts/account.model";
 
 import { TransactionCategory, TransactionType } from "./api/transactions/transaction.entity";
 
@@ -44,8 +42,8 @@ async function seedDatabase(): Promise<void> {
         username: "mario",
         firstName: "Mario",
         lastName: "Rossi",
-        balance: 1820.00,
-        IBAN: "IT60X0542811101000000654321"
+        balance: 1820.0,
+        IBAN: "IT60X0542811101000000654321",
       },
     ]);
 
@@ -68,7 +66,7 @@ async function seedDatabase(): Promise<void> {
       },
       {
         accountId: gianlucaAccount._id,
-        amount: 75.50,
+        amount: 75.5,
         description: "Pagamento Utenze - Addebito diretto Enel Energia",
         category: TransactionCategory.UtilityPayment,
         type: TransactionType.Outcome,

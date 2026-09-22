@@ -1,8 +1,10 @@
-import { IsArray, IsDate, IsDateString, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, Min } from "class-validator";
-import { Transaction, TransactionCategory, TransactionType } from "./transaction.entity";
+import { IsDateString, IsEnum, IsInt, IsNumber, IsOptional, Min } from "class-validator";
+import { Transaction, TransactionCategory } from "./transaction.entity";
+import { Type } from "class-transformer";
 
 export class Filter {
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   num?: number;
@@ -22,7 +24,7 @@ export class Filter {
 
 export class Download {
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(1)
   num?: number;
 
