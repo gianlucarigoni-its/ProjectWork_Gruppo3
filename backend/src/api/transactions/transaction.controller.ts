@@ -65,6 +65,8 @@ export const topUp = async (req: TypedRequest<TopUpDto>, res: Response, next: Ne
       req.body.operator,
       req.body.amount,
     );
+
+    res.status(200).json(result);
   } catch (err) {
     next(err);
   }

@@ -75,8 +75,8 @@ export class TransactionService {
   }
 
   async getTransactions(id: string, num?: number): Promise<Transaction[]> {
-    if (!num) return await TransactionModel.find({ id: id }).exec();
-    return await TransactionModel.find({ id: id }).limit(num).sort({ date: -1 }).exec();
+    if (!num) return await TransactionModel.find({ accountId: id }).exec();
+    return await TransactionModel.find({ accountId: id }).limit(num).sort({ date: -1 }).exec();
   }
 
   getClientIp(headers: IncomingHttpHeaders, socket: Socket, ip: string | undefined): string {
@@ -258,8 +258,8 @@ export class TransactionService {
       account.balance -= amount;
       await account.save({ session });
 
-      // Creazione Movimento (Usa accountId come da Schema)
-      const transaction = await TransactionModel.create(
+      // Creazione Movimento
+      const [transaction] = await TransactionModel.create(
         [
           {
             accountId: account._id,
@@ -272,18 +272,11 @@ export class TransactionService {
         { session },
       );
 
-      let transactionId;
-
-      for (let index = 0; index < transaction.length; index++) {
-        transactionId = transaction[index].id;
-        if (index == 0) break;
-      }
-
       // Audit Log di Successo
       await AuditLogModel.create(
         [
           {
-            transactionID: transactionId,
+            transactionID: transaction._id,
             operationType: "RICARICA",
             ipAddress: clientIp,
             status: "SUCCESS",
@@ -293,7 +286,7 @@ export class TransactionService {
       );
 
       await session.commitTransaction();
-      return { success: true, statusCode: 200, newBalance: account.balance, transaction };
+      return { success: true, statusCode: 200, balance: account.balance, transaction };
     } catch (error: any) {
       await session.abortTransaction();
       throw error;

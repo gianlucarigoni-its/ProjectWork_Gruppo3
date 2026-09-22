@@ -1,7 +1,6 @@
 import { Response, NextFunction } from "express";
 import { TypedRequest } from "../../lib/typed-request.interface";
 import accountSrv from "./account.service";
-import { identity } from "lodash";
 
 export const home = async (req: TypedRequest, res: Response, next: NextFunction) => {
   try {

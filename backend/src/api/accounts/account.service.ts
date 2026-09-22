@@ -61,7 +61,7 @@ export class AccountService {
 
   async getHome(id: string, limit?: number) {
     const account = await this.getAccountById(id);
-    const transactions = await transactionSrv.getTransactions(id, limit);
+    const transactions = await transactionSrv.getTransactions(account.id, limit);
 
     return {
       account,
