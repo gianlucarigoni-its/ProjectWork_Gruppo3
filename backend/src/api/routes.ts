@@ -10,6 +10,5 @@ apiRouter.use("/auth", authRouter);
 apiRouter.use(isAuthenticated);
 apiRouter.use("/accounts", accountsRouter);
 apiRouter.use("/transactions", transactionsRouter);
-apiRouter.use("/operations", operationsRouter);
 
 export default apiRouter;

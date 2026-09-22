@@ -16,13 +16,6 @@ export class BonificoController {
       const clientIp = getClientIp(req);
       const { recipientIBAN, amount, description } = req.body;
 
-      if (!recipientIBAN || !amount || Number(amount) <= 0) {
-        res.status(400).json({
-          message: "Dati per il bonifico incompleti o non validi. IBAN e importo maggiore di zero sono obbligatori.",
-        });
-        return;
-      }
-
       const result = await BonificoService.execute(senderAccountId, clientIp, {
         recipientIBAN: recipientIBAN.trim(),
         amount: Number(amount),
