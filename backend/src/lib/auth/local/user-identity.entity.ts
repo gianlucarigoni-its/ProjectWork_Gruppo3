@@ -8,4 +8,4 @@ export type UserIdentity = {
     hashedPassword: string;
   };
   user: Account;
-}
+};
