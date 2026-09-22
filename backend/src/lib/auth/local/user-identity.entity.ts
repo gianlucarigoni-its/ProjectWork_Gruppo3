@@ -1,4 +1,4 @@
-import { Account } from "../../../api/accounts/accounts.entity";
+import { Types } from "mongoose";
 
 export type UserIdentity = {
   id: string;
@@ -7,5 +7,5 @@ export type UserIdentity = {
     username: string;
     hashedPassword: string;
   };
-  user: Account;
+  user: Types.ObjectId | string;
 };
