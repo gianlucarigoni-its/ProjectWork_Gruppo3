@@ -27,13 +27,13 @@ export const register = async (req: TypedRequest<RegisterDto>, res: Response, ne
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    passport.authenticate("local", { session: false }, (loginErr, account, info) => {
+    passport.authenticate("local", { session: false }, (loginErr, user, info) => {
       if (loginErr) {
         next(loginErr);
         return;
       }
 
-      if (!account) {
+      if (!user) {
         res.status(401);
         res.json({
           error: "LoginError",
@@ -42,9 +42,9 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         return;
       }
 
-      const userObj = account.toObject();
+      const account = user.toObject();
       // generare token
-      const token = jwt.sign(userObj, "my_jwt_secret", { expiresIn: "7 days" });
+      const token = jwt.sign(account, "my_jwt_secret", { expiresIn: "7 days" });
       res.json({
         account,
         token,
