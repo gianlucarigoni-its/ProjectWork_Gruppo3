@@ -25,28 +25,28 @@ export const register = async (req: TypedRequest<RegisterDto>, res: Response, ne
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    passport.authenticate(
-      "local",
-      { session: false },
-      (loginErr: Error | null, user: Express.User | false, info: { message: string } | undefined) => {
-        if (loginErr) {
-          next(loginErr);
-          return;
-        }
+    passport.authenticate("local", { session: false }, (loginErr, user, info) => {
+      if (loginErr) {
+        next(loginErr);
+        return;
+      }
 
-        if (!user) {
-          res.status(401);
-          res.json({ error: "LoginError", message: info?.message });
-          return;
-        }
-
-        const token = jwt.sign({ sub: (user as { id: string }).id }, process.env.JWT_SECRET as string, {
-          expiresIn: "7 days",
+      if (!user) {
+        res.status(401);
+        res.json({
+          error: "LoginError",
+          message: info.message,
         });
+        return;
+      }
 
-        res.json({ user, token });
-      },
-    )(req, res, next);
+      // generare token
+      const token = jwt.sign(user, "my_jwt_secret", { expiresIn: "7 days" });
+      res.json({
+        user,
+        token,
+      });
+    })(req, res, next);
   } catch (err) {
     next(err);
   }
