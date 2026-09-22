@@ -2,7 +2,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import * as bcrypt from "bcrypt";
 import passport from "passport";
 import { UserIdentityModel } from "./user-identity.model";
-import { Account } from "../../../modules/account/accounts.entity";
+import { Account } from "../../../api/accounts/accounts.entity";
 
 passport.use(
   new LocalStrategy(
@@ -10,22 +10,16 @@ passport.use(
     async (username, password, done) => {
       try {
         const identity = await UserIdentityModel.findOne({
-          "credentials.username": username.toLowerCase(),
+          "credentials.username": username,
         }).populate<{ user: Account }>("user");
 
         if (!identity) {
-          return done(null, false, { message: "Email o password non corretti" });
+          return done(null, false, { message: "Username o password non corretti" });
         }
 
         const passwordMatches = await bcrypt.compare(password, identity.credentials.hashedPassword);
         if (!passwordMatches) {
-          return done(null, false, { message: "Email o password non corretti" });
-        }
-
-        if (!identity.credentials.isConfirmed) {
-          return done(null, false, {
-            message: "Devi confermare la registrazione tramite l'email ricevuta prima di accedere",
-          });
+          return done(null, false, { message: "Username o password non corretti" });
         }
 
         return done(null, identity.user);

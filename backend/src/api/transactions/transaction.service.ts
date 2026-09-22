@@ -4,7 +4,7 @@ import { Filter, TransactionResponse } from "./transaction.dto";
 import { Transaction } from "./transaction.entity";
 import { TransactionModel } from "./transaction.model";
 
-export class transactionService {
+export class TransactionService {
   async filter(filters: Filter, accountId: string): Promise<TransactionResponse> {
     let transactions: Transaction[];
     const { num, category, from, to } = filters;
@@ -71,4 +71,4 @@ export class transactionService {
   }
 }
 
-export default new MovementService();
+export default new TransactionService();

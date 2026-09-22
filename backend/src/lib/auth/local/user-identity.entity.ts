@@ -1,4 +1,4 @@
-import { User } from "../../../api/user/user.entity";
+import { Account } from "../../../api/accounts/accounts.entity";
 
 export type UserIdentity = {
   id: string;
@@ -7,5 +7,5 @@ export type UserIdentity = {
     username: string;
     hashedPassword: string;
   };
-  user: User;
+  user: Account;
 }
