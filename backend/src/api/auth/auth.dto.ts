@@ -34,10 +34,6 @@ export class LoginDto {
 
 export class ChangePasswordDto {
   @IsString()
-  username: string;
-  ss;
-
-  @IsString()
   oldPassword: string;
 
   @Matches(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$"), {

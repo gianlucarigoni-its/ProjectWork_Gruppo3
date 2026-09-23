@@ -74,12 +74,12 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 export const changePassword = async (req: TypedRequest<ChangePasswordDto>, res: Response, next: NextFunction) => {
   try {
-    const checkCredentials = await authSrv.checkCredentials(req.body.username, req.body.oldPassword);
+    const checkCredentials = await authSrv.checkCredentials(req.account.username, req.body.oldPassword);
     if (!checkCredentials)
       //lancia errore credenziali errate
       throw new Error();
 
-    await authSrv.changePassword(req.body.username, req.body.newPassword);
+    await authSrv.changePassword(req.account.username, req.body.newPassword);
 
     res.status(200).json({ message: "Password cambiata con successo" });
   } catch (err) {
