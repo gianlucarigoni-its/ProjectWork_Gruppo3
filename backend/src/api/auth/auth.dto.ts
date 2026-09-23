@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, Matches } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, MinLength, Matches, IsMongoId } from "class-validator";
 
 export class RegisterDto {
   @IsEmail({}, { message: "Email non valida" })
@@ -44,4 +44,9 @@ export class ChangePasswordDto {
 
   @IsString()
   confirmPassword: string;
+}
+
+export class VerifyEmailDto {
+  @IsString()
+  token: string;
 }

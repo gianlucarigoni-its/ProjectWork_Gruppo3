@@ -4,6 +4,10 @@ import { isIP, Socket } from "net";
 import { UserIdentityModel } from "../../lib/auth/local/user-identity.model";
 import { AuthLogModel } from "./auth-log.model";
 import { AuthLog } from "./auth.entity";
+import { TransactionLogModel } from "../transactions/transacition-log.model";
+import { TransactionModel } from "../transactions/transaction.model";
+import { TransactionCategory, TransactionType } from "../transactions/transaction.entity";
+import { Account } from "../accounts/account.entity";
 
 export class AuthService {
   getClientIp(headers: IncomingHttpHeaders, socket: Socket, ip: string | undefined): string {
@@ -74,6 +78,39 @@ export class AuthService {
     if (updated.modifiedCount === 0) {
       throw new Error("Password non modificata");
     }
+  }
+
+  async verifyEmail(token: string): Promise<string | null> {
+    const identity = await UserIdentityModel.findOne({
+      verificationToken: token,
+      verificationTokenExpiry: { $gt: new Date() }, // non scaduto
+      isVerified: false,
+    });
+
+    if (!identity) return null; //InvalidTokenError();
+
+    identity.isVerified = true;
+    identity.verificationToken = null;
+    identity.verificationTokenExpiry = null;
+    await identity.save();
+
+    const accountId = (identity.account as unknown as Account).id;
+    return accountId;
+  }
+
+  async openAccount(accountId: string): Promise<boolean> {
+    const transaction = await TransactionModel.create({
+      accountId: accountId,
+      amount: 0,
+      description: "Apertura conto",
+      category: TransactionCategory.AccountOpening,
+      type: TransactionType.Income,
+      date: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
+    if (!transaction) return false;
+
+    return true;
   }
 }
 

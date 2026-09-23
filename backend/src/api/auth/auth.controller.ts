@@ -5,8 +5,9 @@ import passport from "../../lib/auth/local/local-strategy";
 import { TypedRequest } from "../../lib/typed-request.interface";
 import accountSrv from "../accounts/account.service";
 import { AuthLog, AuthStatus, AuthType } from "./auth.entity";
-import { ChangePasswordDto, RegisterDto } from "./auth.dto";
+import { ChangePasswordDto, RegisterDto, VerifyEmailDto } from "./auth.dto";
 import authSrv from "./auth.service";
+import { UserIdentityModel } from "../../lib/auth/local/user-identity.model";
 
 export const register = async (req: TypedRequest<RegisterDto>, res: Response, next: NextFunction) => {
   try {
@@ -93,6 +94,25 @@ export const changePassword = async (req: TypedRequest<ChangePasswordDto>, res: 
     await authSrv.createAuthLog(logData);
 
     res.status(200).json({ message: "Password cambiata con successo" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const verifyEmail = async (req: TypedRequest<unknown, VerifyEmailDto>, res: Response, next: NextFunction) => {
+  try {
+    if (!req.query.token || typeof req.query.token !== "string") {
+      throw new Error("token non valido");
+    }
+
+    const verify = await authSrv.verifyEmail(req.query.token);
+    if (!verify) throw new Error();
+
+    const openAccount = await authSrv.openAccount(verify);
+
+    if (!openAccount) throw new Error();
+
+    res.status(200).json({ message: "Email confermata! Puoi ora accedere." });
   } catch (err) {
     next(err);
   }

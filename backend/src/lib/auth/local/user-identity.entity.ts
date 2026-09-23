@@ -8,4 +8,7 @@ export type UserIdentity = {
     hashedPassword: string;
   };
   account: Types.ObjectId | string;
+  isVerified: boolean;
+  verificationToken: string | null;
+  verificationTokenExpiry: Date | null;
 };

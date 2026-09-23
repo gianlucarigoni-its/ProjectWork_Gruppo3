@@ -9,6 +9,8 @@ import authService from "../auth/auth.service";
 import transactionSrv from "../transactions/transaction.service";
 import { Account } from "./account.entity";
 import { AccountModel } from "./account.model";
+import MailSrv from "../../lib/mail.service";
+import crypto from "crypto";
 
 export class AccountService {
   getClientIp(headers: IncomingHttpHeaders, socket: Socket, ip: string | undefined): string {
@@ -43,6 +45,8 @@ export class AccountService {
       session.startTransaction();
 
       try {
+        const verificationToken = crypto.randomBytes(32).toString("hex");
+        const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
         const iban = generateRandomIban("IT");
 
         const [newAccount] = await AccountModel.create(
@@ -51,13 +55,15 @@ export class AccountService {
         );
 
         const hashedPassword = await bcrypt.hash(credentials.password, 10);
-
         await UserIdentityModel.create(
           [
             {
               provider: "local",
               account: newAccount.id,
               credentials: { username: credentials.username, hashedPassword },
+              isVerified: false,
+              verificationToken,
+              verificationTokenExpiry,
             },
           ],
           { session },
@@ -71,6 +77,10 @@ export class AccountService {
           type: logData.type,
           status: AuthStatus.success,
         });
+
+        const mail = await MailSrv.sendVerificationEmail(credentials.username, verificationToken);
+        if (!mail) console.error("Account creato ma mail non inviata per:", credentials.username);
+
         return newAccount;
       } catch (err) {
         await session.abortTransaction();
