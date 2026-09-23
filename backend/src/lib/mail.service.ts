@@ -1,4 +1,3 @@
-import "dotenv/config";
 import nodemailer from "nodemailer";
 
 export class MailService {
@@ -6,8 +5,9 @@ export class MailService {
   // in locale usi Ethereal (mail fake, nessuna config reale necessaria)
   // in produzione usi le credenziali SMTP istituzionali
   private createTransporter() {
-    console.log("ETHEREAL_USER:", process.env.ETHEREAL_USER);
-    console.log("ETHEREAL_PASS:", process.env.ETHEREAL_PASS);
+    // console.log("ETHEREAL_USER:", process.env.ETHEREAL_USER);
+    // console.log("ETHEREAL_PASS:", process.env.ETHEREAL_PASS);
+    // console.log("SMTP_HOST:", process.env.SMTP_HOST);
     // Se non c'è SMTP_HOST configurato, usa Ethereal in automatico
     if (!process.env.SMTP_HOST) {
       // Ethereal: cattura le mail senza inviarle davvero,
@@ -72,4 +72,5 @@ export class MailService {
   }
 }
 
-export default new MailService();
+export const MailSrv = new MailService();
+export default MailSrv;
