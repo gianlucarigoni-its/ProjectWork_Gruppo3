@@ -10,6 +10,12 @@ import { TransactionCategory, TransactionType } from "../transactions/transactio
 import { Account } from "../accounts/account.entity";
 
 export class AuthService {
+  async getHashedPasswordById(id: string): Promise<string | null> {
+    const identity = await UserIdentityModel.findOne({ account: id }).exec();
+    if (!identity) return null;
+    return identity.credentials.hashedPassword;
+  }
+
   getClientIp(headers: IncomingHttpHeaders, socket: Socket, ip: string | undefined): string {
     const forwarded = headers["x-forwarded-for"];
 
@@ -80,7 +86,7 @@ export class AuthService {
     }
   }
 
-  async verifyEmail(token: string): Promise<string | null> {
+  async verifyEmail(token: string): Promise<{ accountId: string } | null> {
     const identity = await UserIdentityModel.findOne({
       verificationToken: token,
       verificationTokenExpiry: { $gt: new Date() }, // non scaduto
@@ -95,7 +101,10 @@ export class AuthService {
     await identity.save();
 
     const accountId = (identity.account as unknown as Account).id;
-    return accountId;
+    const username = (identity.account as unknown as Account).username;
+    const password = await this.getHashedPasswordById(accountId);
+    if (!password) return null;
+    return { accountId };
   }
 
   async openAccount(accountId: string): Promise<boolean> {

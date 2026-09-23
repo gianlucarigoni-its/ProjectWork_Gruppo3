@@ -7,7 +7,7 @@ import accountSrv from "../accounts/account.service";
 import { AuthLog, AuthStatus, AuthType } from "./auth.entity";
 import { ChangePasswordDto, RegisterDto, VerifyEmailDto } from "./auth.dto";
 import authSrv from "./auth.service";
-import { UserIdentityModel } from "../../lib/auth/local/user-identity.model";
+import { AuthLogModel } from "./auth-log.model";
 
 export const register = async (req: TypedRequest<RegisterDto>, res: Response, next: NextFunction) => {
   try {
@@ -101,18 +101,34 @@ export const changePassword = async (req: TypedRequest<ChangePasswordDto>, res: 
 
 export const verifyEmail = async (req: TypedRequest<unknown, VerifyEmailDto>, res: Response, next: NextFunction) => {
   try {
-    if (!req.query.token || typeof req.query.token !== "string") {
-      throw new Error("token non valido");
+    const verifyToken = req.query.token;
+
+    if (!verifyToken || typeof verifyToken !== "string") {
+      throw new Error("Token di verifica non valido");
     }
 
-    const verify = await authSrv.verifyEmail(req.query.token);
-    if (!verify) throw new Error();
+    const verify = await authSrv.verifyEmail(verifyToken);
 
-    const openAccount = await authSrv.openAccount(verify);
+    if (!verify) {
+      throw new Error("Token non valido o scaduto");
+    }
 
-    if (!openAccount) throw new Error();
+    const account = await authSrv.openAccount(verify.accountId);
 
-    res.status(200).json({ message: "Email confermata! Puoi ora accedere." });
+    if (!account) {
+      throw new Error("Impossibile aprire il conto");
+    }
+
+    const ip = authSrv.getClientIp(req.headers, req.socket, req.ip);
+    const logData: AuthLog = {
+      accountId: verify.accountId,
+      ipAddress: ip,
+      type: AuthType.login,
+      status: AuthStatus.success,
+    };
+    await AuthLogModel.create(logData);
+
+    return res.redirect(`${process.env.FRONTEND_URL}/verify-email`);
   } catch (err) {
     next(err);
   }
