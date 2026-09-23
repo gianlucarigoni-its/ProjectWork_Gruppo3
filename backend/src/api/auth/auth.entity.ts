@@ -8,6 +8,7 @@ export enum AuthStatus {
 export enum AuthType {
   register = "Register",
   login = "Login",
+  changePassword = "Change Password",
 }
 
 export type AuthLog = {

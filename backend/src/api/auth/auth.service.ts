@@ -1,5 +1,5 @@
 import { IncomingHttpHeaders } from "http";
-import { Socket } from "net";
+import { isIP, Socket } from "net";
 import { AuthLogModel } from "./auth-log.model";
 import { AuthLog } from "./auth.entity";
 import { UserIdentityModel } from "../../lib/auth/local/user-identity.model";
@@ -9,10 +9,30 @@ import { Account } from "../accounts/account.entity";
 export class AuthService {
   getClientIp(headers: IncomingHttpHeaders, socket: Socket, ip: string | undefined): string {
     const forwarded = headers["x-forwarded-for"];
+
+    let candidate: string;
+
     if (typeof forwarded === "string") {
-      return forwarded.split(",")[0].trim();
+      candidate = forwarded.split(",")[0].trim();
+    } else {
+      candidate = ip || socket.remoteAddress || "127.0.0.1";
     }
-    return ip || socket.remoteAddress || "127.0.0.1";
+
+    return this.normalizeIp(candidate);
+  }
+
+  private normalizeIp(rawIp: string): string {
+    let ip = rawIp.trim();
+
+    if (ip.startsWith("::ffff:")) {
+      ip = ip.slice(7);
+    }
+
+    if (isIP(ip) === 0) {
+      return "127.0.0.1";
+    }
+
+    return ip;
   }
 
   async createAuthLog(logData: AuthLog) {

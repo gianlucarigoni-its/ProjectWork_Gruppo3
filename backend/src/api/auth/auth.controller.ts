@@ -83,6 +83,15 @@ export const changePassword = async (req: TypedRequest<ChangePasswordDto>, res: 
 
     await authSrv.changePassword(req.account.username, req.body.newPassword);
 
+    const ip = authSrv.getClientIp(req.headers, req.socket, req.ip);
+    const logData: AuthLog = {
+      accountId: req.account.id,
+      ipAddress: ip,
+      type: AuthType.changePassword,
+      status: AuthStatus.success,
+    };
+    await authSrv.createAuthLog(logData);
+
     res.status(200).json({ message: "Password cambiata con successo" });
   } catch (err) {
     next(err);
