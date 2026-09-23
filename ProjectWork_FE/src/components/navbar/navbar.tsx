@@ -25,14 +25,24 @@ export const Navbar: React.FC<NavbarProps> = ({ userName }) => {
           </li>
 
           {isAuthenticated && (
-            <li className="nav-item">
-              <NavLink 
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} 
-                to="/ricarica"
-              >
-                Ricarica
-              </NavLink>
-            </li>
+            <>
+              <li className="nav-item">
+                <NavLink 
+                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} 
+                  to="/ricarica"
+                >
+                  Ricarica
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                  <NavLink 
+                    className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} 
+                    to="/transactions"
+                  >
+                    Movimenti
+                  </NavLink>
+                </li>
+            </>
           )}
         </ul>
       </div>
