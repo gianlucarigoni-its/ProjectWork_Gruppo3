@@ -1,10 +1,9 @@
+import * as bcrypt from "bcrypt";
 import { IncomingHttpHeaders } from "http";
 import { isIP, Socket } from "net";
+import { UserIdentityModel } from "../../lib/auth/local/user-identity.model";
 import { AuthLogModel } from "./auth-log.model";
 import { AuthLog } from "./auth.entity";
-import { UserIdentityModel } from "../../lib/auth/local/user-identity.model";
-import * as bcrypt from "bcrypt";
-import { Account } from "../accounts/account.entity";
 
 export class AuthService {
   getClientIp(headers: IncomingHttpHeaders, socket: Socket, ip: string | undefined): string {
