@@ -6,6 +6,7 @@ import transactionsRouter from "./transactions/transaction.router";
 const apiRouter = Router();
 
 apiRouter.use("/auth", authRouter);
+apiRouter.use(isAuthenticated);
 apiRouter.use("/account", accountsRouter);
 apiRouter.use("/accounts", accountsRouter);
 apiRouter.use("/transactions", transactionsRouter);
