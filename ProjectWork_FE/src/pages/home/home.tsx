@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './home.css';
 import { BonificoButton } from '../../components/BonificoButton';
+import Navbar from '../../components/navbar/navbar';
 
 interface Account {
   id?: string;
@@ -110,96 +111,102 @@ export const HomePage: React.FC = () => {
     balance: rawAccount.balance ?? rawAccount.saldo ?? 0,
   };
 
+  const fullUserName = `${account.firstName} ${account.lastName}`.trim();
+
   return (
-    <div className="dashboard-container">
-      {/* Intestazione */}
-      <header className="dashboard-header">
-        <h1 className="welcome-title">
-          Benvenuto, {account.firstName} {account.lastName}
-        </h1>
-        <div className="iban-badge">
-          <span>IBAN:</span>
-          <span className="iban-value">{account.iban}</span>
-        </div>
-      </header>
+    <>
+      <Navbar userName={fullUserName || 'Utente'} />
+      <div className="dashboard-container">
+        {/* Intestazione */}
+        <header className="dashboard-header">
+          <h1 className="welcome-title">
+            Benvenuto, {account.firstName} {account.lastName}
+          </h1>
+          <div className="iban-badge">
+            <span>IBAN:</span>
+            <span className="iban-value">{account.iban}</span>
+          </div>
+        </header>
 
-      {/* Pulsante Bonifico */}
-      <BonificoButton onTransactionComplete={fetchDashBoardData} />
+        {/* Pulsante Bonifico */}
+        <BonificoButton onTransactionComplete={fetchDashBoardData} />
 
-      {/* Scheda Saldo */}
-      <section className="cards-grid">
-        <div className="balance-card">
-          <div className="card-label">Saldo Disponibile</div>
-          <h2 className="card-amount">
-            € {account.balance.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
-          </h2>
-        </div>
-      </section>
+        {/* Scheda Saldo */}
+        <section className="cards-grid">
+          <div className="balance-card">
+            <div className="card-label">Saldo Disponibile</div>
+            <h2 className="card-amount">
+              € {account.balance.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+            </h2>
+          </div>
+        </section>
 
-      {/* Tabella Movimenti */}
-      <section>
-        <div className="section-header">
-          <h2 className="section-title">Ultimi Movimenti</h2>
-          <Link to="/movimenti" className="btn-view-all">
-            Mostra tutti →
-          </Link>
-        </div>
+        {/* Tabella Movimenti */}
+        <section>
+          <div className="section-header">
+            <h2 className="section-title">Ultimi Movimenti</h2>
+            <Link to="/movimenti" className="btn-view-all">
+              Mostra tutti →
+            </Link>
+          </div>
 
-        <div className="table-card">
-          <table className="transactions-table">
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Categoria</th>
-                <th>Descrizione</th>
-                <th style={{ textAlign: 'right' }}>Importo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rawTransactions.length === 0 ? (
+          <div className="table-card">
+            <table className="transactions-table">
+              <thead>
                 <tr>
-                  <td colSpan={4} style={{ textAlign: 'center' }}>
-                    Nessun movimento trovato.
-                  </td>
+                  <th>Data</th>
+                  <th>Categoria</th>
+                  <th>Descrizione</th>
+                  <th style={{ textAlign: 'right' }}>Importo</th>
                 </tr>
-              ) : (
-                rawTransactions.map((mov) => {
-                  const valAmount = mov.amount ?? mov.importo ?? 0;
-                  const valCategory = mov.category || mov.categoria || 'Generico';
-                  const valDescription = mov.description || mov.descrizione || '-';
-                  const valDate = mov.date || mov.data;
-                  const isPositive = valAmount >= 0;
+              </thead>
+              <tbody>
+                {rawTransactions.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} style={{ textAlign: 'center' }}>
+                      Nessun movimento trovato.
+                    </td>
+                  </tr>
+                ) : (
+                  rawTransactions.map((mov) => {
+                    const valAmount = mov.amount ?? mov.importo ?? 0;
+                    const valCategory = mov.category || mov.categoria || 'Generico';
+                    const valDescription = mov.description || mov.descrizione || '-';
+                    const valDate = mov.date || mov.data;
+                    const isPositive = valAmount >= 0;
 
-                  return (
-                    <tr key={mov.id || mov._id || Math.random()}>
-                      <td>
-                        {valDate
-                          ? new Date(valDate).toLocaleDateString('it-IT', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                            })
-                          : '-'}
-                      </td>
-                      <td>
-                        <span className="category-badge">{valCategory}</span>
-                      </td>
-                      <td>{valDescription}</td>
-                      <td
-                        style={{ textAlign: 'right' }}
-                        className={isPositive ? 'amount-positive' : 'amount-negative'}
-                      >
-                        {isPositive ? '+' : ''}
-                        € {valAmount.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
+                    return (
+                      <tr key={mov.id || mov._id || Math.random()}>
+                        <td>
+                          {valDate
+                            ? new Date(valDate).toLocaleDateString('it-IT', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                              })
+                            : '-'}
+                        </td>
+                        <td>
+                          <span className="category-badge">{valCategory}</span>
+                        </td>
+                        <td>{valDescription}</td>
+                        <td
+                          style={{ textAlign: 'right' }}
+                          className={isPositive ? 'amount-positive' : 'amount-negative'}
+                        >
+                          {isPositive ? '+' : ''}
+                          € {valAmount.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </>
+    
   );
 };
