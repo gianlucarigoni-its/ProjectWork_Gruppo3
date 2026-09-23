@@ -44,6 +44,10 @@ export default function LoginPage() {
     setCaricamento(true);
     try {
       await login(email, password);
+
+      // Salva l'email inserita per permettere alla Dashboard di caricare l'account corretto
+      localStorage.setItem('userEmail', email);
+
       if (timerRef.current) window.clearInterval(timerRef.current);
       navigate('/home');
     } catch (err: any) {

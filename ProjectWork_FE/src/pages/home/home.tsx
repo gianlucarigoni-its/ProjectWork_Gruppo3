@@ -5,21 +5,31 @@ import { BonificoButton } from '../../components/BonificoButton';
 
 interface Account {
   id?: string;
+  _id?: string;
   username?: string;
   firstName?: string;
   lastName?: string;
+  nomeTitolare?: string;
+  cognomeTitolare?: string;
   IBAN?: string;
+  iban?: string;
   balance?: number;
+  saldo?: number;
 }
 
 interface Transaction {
   id?: string;
+  _id?: string;
   accountId?: string;
-  amount: number;
+  amount?: number;
+  importo?: number;
   description?: string;
+  descrizione?: string;
   category?: string;
+  categoria?: string;
   type?: string;
-  date: string;
+  date?: string;
+  data?: string;
 }
 
 interface HomeDashboardData {
@@ -34,27 +44,39 @@ export const HomePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchDashBoardData = () => {
-        const token = localStorage.getItem('token');
-        fetch('http://localhost:3000/api/home' ,{
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then((res) => {
-                if(!res.ok) {
-                    throw new Error(`Errore HTTP ${res.status}`);
-                }
-                return res.json();
-            })
-            .then((dashboardData : HomeDashboardData) => {
-                setData(dashboardData);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error('Errore nel recupero dati:', err);
-                setLoading(false);
-            });
+    const token = localStorage.getItem('token');
+    const accountId = localStorage.getItem('accountId');
+    const userEmail = localStorage.getItem('userEmail');
 
+    // Costruisce i parametri da inviare nella query string
+    const params = new URLSearchParams();
+    if (userEmail) params.append('email', userEmail);
+    if (accountId) params.append('accountId', accountId);
+
+    const queryString = params.toString();
+    const url = queryString
+      ? `http://localhost:3000/api/account/home?${queryString}`
+      : 'http://localhost:3000/api/account/home';
+
+    fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Errore HTTP ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((dashboardData: HomeDashboardData) => {
+        setData(dashboardData);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Errore nel recupero dati:', err);
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -69,10 +91,10 @@ export const HomePage: React.FC = () => {
     );
   }
 
-  const account = data?.account || data?.conto;
-  const transactions = data?.transactions || data?.ultimiMovimenti || [];
+  const rawAccount = data?.account || data?.conto;
+  const rawTransactions = data?.transactions || data?.ultimiMovimenti || [];
 
-  if (!account) {
+  if (!rawAccount) {
     return (
       <div className="dashboard-container" style={{ textAlign: 'center', paddingTop: '4rem' }}>
         <p>Impossibile recuperare i dati dell'account.</p>
@@ -80,29 +102,36 @@ export const HomePage: React.FC = () => {
     );
   }
 
+  // Normalizzazione delle proprietà
+  const account = {
+    firstName: rawAccount.firstName || rawAccount.nomeTitolare || rawAccount.username || '',
+    lastName: rawAccount.lastName || rawAccount.cognomeTitolare || '',
+    iban: rawAccount.IBAN || rawAccount.iban || 'In fase di assegnazione',
+    balance: rawAccount.balance ?? rawAccount.saldo ?? 0,
+  };
+
   return (
     <div className="dashboard-container">
       {/* Intestazione */}
       <header className="dashboard-header">
         <h1 className="welcome-title">
-          Benvenuto, {account.firstName || ''} {account.lastName || ''}
+          Benvenuto, {account.firstName} {account.lastName}
         </h1>
         <div className="iban-badge">
           <span>IBAN:</span>
-          <span className="iban-value">{account.IBAN || 'In fase di assegnazione'}</span>
+          <span className="iban-value">{account.iban}</span>
         </div>
       </header>
 
-      {/* MODALE CON BUTTON BONIFICO */}
-
-        <BonificoButton onTransactionComplete={fetchDashBoardData} />
+      {/* Pulsante Bonifico */}
+      <BonificoButton onTransactionComplete={fetchDashBoardData} />
 
       {/* Scheda Saldo */}
       <section className="cards-grid">
         <div className="balance-card">
           <div className="card-label">Saldo Disponibile</div>
           <h2 className="card-amount">
-            € {(account.balance ?? 0).toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+            € {account.balance.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
           </h2>
         </div>
       </section>
@@ -127,20 +156,25 @@ export const HomePage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {transactions.length === 0 ? (
+              {rawTransactions.length === 0 ? (
                 <tr>
                   <td colSpan={4} style={{ textAlign: 'center' }}>
                     Nessun movimento trovato.
                   </td>
                 </tr>
               ) : (
-                transactions.map((mov) => {
-                  const isPositive = mov.amount >= 0;
+                rawTransactions.map((mov) => {
+                  const valAmount = mov.amount ?? mov.importo ?? 0;
+                  const valCategory = mov.category || mov.categoria || 'Generico';
+                  const valDescription = mov.description || mov.descrizione || '-';
+                  const valDate = mov.date || mov.data;
+                  const isPositive = valAmount >= 0;
+
                   return (
-                    <tr key={mov.id || Math.random()}>
+                    <tr key={mov.id || mov._id || Math.random()}>
                       <td>
-                        {mov.date
-                          ? new Date(mov.date).toLocaleDateString('it-IT', {
+                        {valDate
+                          ? new Date(valDate).toLocaleDateString('it-IT', {
                               day: '2-digit',
                               month: '2-digit',
                               year: 'numeric',
@@ -148,15 +182,15 @@ export const HomePage: React.FC = () => {
                           : '-'}
                       </td>
                       <td>
-                        <span className="category-badge">{mov.category || 'Generico'}</span>
+                        <span className="category-badge">{valCategory}</span>
                       </td>
-                      <td>{mov.description || '-'}</td>
+                      <td>{valDescription}</td>
                       <td
                         style={{ textAlign: 'right' }}
                         className={isPositive ? 'amount-positive' : 'amount-negative'}
                       >
                         {isPositive ? '+' : ''}
-                        € {(mov.amount ?? 0).toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                        € {valAmount.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
                       </td>
                     </tr>
                   );

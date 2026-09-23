@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useAuth } from './context/authContext';
 import RegisterPage from './pages/home/RegisterPage';
 import LoginPage from './components/pages/loginPage';
-import HomePage from './pages/home/HomePage';
+import {HomePage} from './pages/home/home';
 import MovimentoDettaglioPage from './pages/home/MovimentoDettaglioPage';
 import ConfermaPage from './pages/home/ConfermaPage';
 import RicercaMovimentiPage from './pages/home/RicercaMovimentiPage';

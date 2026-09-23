@@ -1,10 +1,15 @@
 import { Router } from "express";
 import transactionsRouter from "../transactions/transaction.router";
-import { home } from "./account.controller";
+import { home, getAccountById } from "./account.controller";
 
 const router = Router({ mergeParams: true });
 
-//router.use("/:accountId");
+
+// Rotte per la Dashboard / Home dell'account
 router.get("/home", home);
+
+
+// Rotta per recuperare l'account specifico
+router.get("/:accountId", getAccountById);
 
 export default router;

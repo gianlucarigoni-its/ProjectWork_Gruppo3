@@ -21,9 +21,22 @@ export class AccountService {
 
   async getAccountById(id: string): Promise<Account> {
     const account = await AccountModel.findById(id).exec();
-    return account!.toObject();
+    if (!account) throw new Error("Account non trovato");
+    return account.toObject ? account.toObject() : account;
   }
 
+  /**
+   * Recupera un account tramite EMAIL (univoca nel database)
+   */
+  async getAccountByEmail(email: string): Promise<Account | null> {
+    const account = await AccountModel.findOne({ email }).exec();
+    if (!account) return null;
+    return account.toObject ? account.toObject() : account;
+  }
+
+  /**
+   * Registra un nuovo account con IBAN e credenziali salvate in modo atomico
+   */
   async add(
     account: Omit<Account, "id" | "username" | "IBAN" | "balance" | "createdAt">,
     credentials: { username: string; password: string },
@@ -85,9 +98,30 @@ export class AccountService {
     }
   }
 
+  /**
+   * Recupera le informazioni della Dashboard per ID Account
+   */
   async getHome(id: string, limit?: number) {
     const account = await this.getAccountById(id);
     const transactions = await transactionSrv.getTransactions(account.id, limit);
+
+    return {
+      account,
+      transactions,
+    };
+  }
+
+  /**
+   * Recupera le informazioni della Dashboard per Email Utente
+   */
+  async getHomeByEmail(email: string, limit?: number) {
+    const account = await this.getAccountByEmail(email);
+    if (!account) {
+      throw new Error("Nessun account trovato per l'email fornita");
+    }
+
+    const accountId = (account as any)._id?.toString() || account.id;
+    const transactions = await transactionSrv.getTransactions(accountId, limit);
 
     return {
       account,
