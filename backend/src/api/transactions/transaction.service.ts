@@ -10,14 +10,14 @@ import { TransactionLogModel } from "./transacition-log.model";
 export class TransactionService {
   async filter(filters: Filter, accountId: string): Promise<TransactionResponse> {
     let transactions: Transaction[];
-    const { num, category, from, to } = filters;
+    const { limit, category, from, to } = filters;
     let queryFilter: QueryFilter<Transaction> = { accountId };
-    let limit = 0;
+    let num = 0;
     const account = await AccountModel.findById(accountId).select("balance").exec();
 
     if (category == undefined && from == undefined && to == undefined) {
-      if (num != undefined) {
-        transactions = await TransactionModel.find({ accountId }).sort({ date: -1 }).limit(num).exec();
+      if (limit != undefined) {
+        transactions = await TransactionModel.find({ accountId }).sort({ date: -1 }).limit(limit).exec();
         return {
           transactions,
           balance: account?.balance,
@@ -29,7 +29,7 @@ export class TransactionService {
           balance: account?.balance,
         };
       }
-    } else if (num != undefined) limit = num;
+    } else if (num != undefined) num = limit!;
 
     if (category != undefined) queryFilter.category = category;
 
@@ -46,7 +46,7 @@ export class TransactionService {
     }
 
     if (limit === 0) transactions = await TransactionModel.find(queryFilter).sort({ date: -1 });
-    else transactions = await TransactionModel.find(queryFilter).sort({ date: -1 }).limit(limit);
+    else transactions = await TransactionModel.find(queryFilter).sort({ date: -1 }).limit(num);
 
     return { transactions };
   }
