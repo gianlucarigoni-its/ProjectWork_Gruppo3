@@ -43,11 +43,18 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     const updated = await UserIdentityModel.updateOne(
       { "credentials.username": username },
-      { $set: { password: hashedPassword } },
+      { $set: { "credentials.hashedPassword": hashedPassword } },
     );
 
-    if (updated.modifiedCount < 0) throw new Error();
-    return;
+    console.log("CHANGE PASSWORD RESULT:", updated);
+
+    if (updated.matchedCount === 0) {
+      throw new Error("Utente non trovato");
+    }
+
+    if (updated.modifiedCount === 0) {
+      throw new Error("Password non modificata");
+    }
   }
 }
 

@@ -74,6 +74,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 export const changePassword = async (req: TypedRequest<ChangePasswordDto>, res: Response, next: NextFunction) => {
   try {
+    if (req.body.newPassword != req.body.confirmPassword) throw new Error();
+
     const checkCredentials = await authSrv.checkCredentials(req.account.username, req.body.oldPassword);
     if (!checkCredentials)
       //lancia errore credenziali errate
