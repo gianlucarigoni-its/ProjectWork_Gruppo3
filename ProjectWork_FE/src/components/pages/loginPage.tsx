@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
+import logoImg from '../../../public/img/3Vision_DigitalBank_LogoRMBG_white.png'; 
+import '../../styles/login.css';
 
 const TEMPO_LIMITE_SECONDI = 30;
 
@@ -44,8 +46,6 @@ export default function LoginPage() {
     setCaricamento(true);
     try {
       await login(email, password);
-
-      // Salva l'email inserita per permettere alla Dashboard di caricare l'account corretto
       localStorage.setItem('userEmail', email);
 
       if (timerRef.current) window.clearInterval(timerRef.current);
@@ -60,41 +60,56 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
-      <form onSubmit={handleSubmit} className="auth-form">
-        <h1>Login</h1>
+      <div className="auth-card">
+        {/* Logo Reale */}
+        <div className="auth-brand">
+          <img src={logoImg} alt="3Vision Logo" className="auth-logo-img" />
+        </div>
 
-        <p className="timer">Tempo rimasto: {secondiRimasti}s</p>
+        <div className="auth-header">
+          <h2>Accedi al tuo conto</h2>
+          <p className="auth-subtitle">Inserisci le tue credenziali per proseguire</p>
+          <div className={`timer-badge ${secondiRimasti <= 10 ? 'warning' : ''}`}>
+            ⏱ Tempo rimasto: <strong>{secondiRimasti}s</strong>
+          </div>
+        </div>
 
-        {errore && <p className="errore">{errore}</p>}
+        {errore && <div className="auth-alert error">{errore}</div>}
 
-        <label>
-          Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="nome@esempio.it"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-        <label>
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-        <button type="submit" disabled={caricamento}>
-          {caricamento ? 'Accesso in corso...' : 'Login'}
-        </button>
+          <button type="submit" className="auth-btn" disabled={caricamento}>
+            {caricamento ? 'Accesso in corso...' : 'Accedi'}
+          </button>
 
-        <p>
-          Non hai un account? <Link to="/register">Registrati</Link>
-        </p>
-      </form>
+          <p className="auth-footer-text">
+            Non hai ancora un conto? <Link to="/register">Apri un conto</Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,188 @@
+/* Layout Generale Pagine Autenticazione */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Gradient che unisce verde scuro, base scura e arancione elegante */
+  background: linear-gradient(135deg, #092e20 0%, #0d1117 50%, #4a1d08 100%);
+  padding: 1rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #f3f4f6;
+  box-sizing: border-box;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 14px;
+  padding: 1.25rem 1.75rem; /* Padding ridotto per evitare lo scroll */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}
+
+/* Brand Identity - Logo Centrato e Compatto */
+.auth-brand {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.5rem; /* Spazio ridotto sotto il logo */
+}
+
+.auth-logo-img {
+  height: 48px; /* Dimensione bilanciata per la card */
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+/* Header & Timer */
+.auth-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.auth-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem 0;
+  color: #ffffff;
+}
+
+.auth-subtitle {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.timer-badge {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.65rem;
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  color: #fb923c;
+}
+
+.timer-badge.warning {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+/* Form & Input Fields */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* Distanza ridotta tra i campi */
+}
+
+.form-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.form-group label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #d1d5db;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.55rem 0.75rem; /* Altezza input ridotta */
+  background: #21262d;
+  border: 1px solid #363b42;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.85rem;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-group input::placeholder {
+  color: #6e7681;
+}
+
+.form-group input:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+}
+
+/* Pulsante */
+.auth-btn {
+  margin-top: 0.25rem;
+  width: 100%;
+  padding: 0.7rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.2s ease, background 0.3s ease;
+}
+
+.auth-btn:hover {
+  filter: brightness(1.1);
+  background: linear-gradient(135deg, #10b981 0%, #ea580c 100%);
+}
+
+.auth-btn:active {
+  transform: scale(0.99);
+}
+
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Footer Link */
+.auth-footer-text {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0.25rem 0 0 0;
+}
+
+.auth-footer-text a {
+  color: #f97316;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-footer-text a:hover {
+  text-decoration: underline;
+}
+
+/* Alert Error/Success */
+.auth-alert {
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+
+.auth-alert.error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.auth-alert.success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}

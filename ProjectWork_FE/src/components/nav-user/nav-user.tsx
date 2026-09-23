@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './nav-user.css';
 
 interface NavUserProps {
@@ -7,13 +7,33 @@ interface NavUserProps {
 }
 
 export const NavUser: React.FC<NavUserProps> = ({ 
-  userName = 'Gianluca Rigoni', 
+  userName = 'Utente', 
   onLogout 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Riferimento al contenitore del componente
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Gestore del click fuori dal menu
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    // Ascolta i click su tutto il documento
+    document.addEventListener('mousedown', handleClickOutside);
+
+    // Pulizia dell'event listener quando il componente viene smontato
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div className="nav-user-container">
+    <div className="nav-user-container" ref={menuRef}>
       {/* Bottone con Icona Utente */}
       <button
         className="nav-user-btn"

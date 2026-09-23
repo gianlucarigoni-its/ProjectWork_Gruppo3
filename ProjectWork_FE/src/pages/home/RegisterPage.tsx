@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../utils/services/authService';
+import logoImg from '../../../public/img/3Vision_DigitalBank_LogoRMBG_white.png';
+import '../../styles/login.css';
 
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const REGEX_PASSWORD = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
@@ -53,8 +55,8 @@ export default function RegisterPage() {
         nomeTitolare,
         cognomeTitolare,
       });
-      setMessaggio(response.data.message);
-      setTimeout(() => navigate('/login'), 3000);
+      setMessaggio(response.data.message || 'Registrazione completata!');
+      setTimeout(() => navigate('/login'), 2500);
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Errore durante la registrazione.';
       setErrore(msg);
@@ -65,50 +67,91 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-page">
-      <form onSubmit={handleSubmit} className="auth-form">
-        <h1>Registrazione</h1>
+      <div className="auth-card">
+        {/* Logo Reale */}
+        <div className="auth-brand">
+          <img src={logoImg} alt="3Vision Logo" className="auth-logo-img" />
+        </div>
 
-        {errore && <p className="errore">{errore}</p>}
-        {messaggio && <p className="successo">{messaggio}</p>}
+        <div className="auth-header">
+          <h2>Crea il tuo account</h2>
+          <p className="auth-subtitle">Inizia a gestire le tue finanze in modo semplice</p>
+        </div>
 
-        <label>
-          Nome
-          <input value={nomeTitolare} onChange={(e) => setNomeTitolare(e.target.value)} required />
-        </label>
+        {errore && <div className="auth-alert error">{errore}</div>}
+        {messaggio && <div className="auth-alert success">{messaggio}</div>}
 
-        <label>
-          Cognome
-          <input value={cognomeTitolare} onChange={(e) => setCognomeTitolare(e.target.value)} required />
-        </label>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="nome">Nome</label>
+              <input
+                id="nome"
+                type="text"
+                placeholder="Mario"
+                value={nomeTitolare}
+                onChange={(e) => setNomeTitolare(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="cognome">Cognome</label>
+              <input
+                id="cognome"
+                type="text"
+                placeholder="Rossi"
+                value={cognomeTitolare}
+                onChange={(e) => setCognomeTitolare(e.target.value)}
+                required
+              />
+            </div>
+          </div>
 
-        <label>
-          Email
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </label>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="mario.rossi@esempio.it"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-        <label>
-          Password
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </label>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Min. 8 car, 1 maiuscola e 1 simbolo"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-        <label>
-          Conferma Password
-          <input
-            type="password"
-            value={confermaPassword}
-            onChange={(e) => setConfermaPassword(e.target.value)}
-            required
-          />
-        </label>
+          <div className="form-group">
+            <label htmlFor="confermaPassword">Conferma Password</label>
+            <input
+              id="confermaPassword"
+              type="password"
+              placeholder="Ripeti la tua password"
+              value={confermaPassword}
+              onChange={(e) => setConfermaPassword(e.target.value)}
+              required
+            />
+          </div>
 
-        <button type="submit" disabled={caricamento}>
-          {caricamento ? 'Registrazione in corso...' : 'Registrati'}
-        </button>
+          <button type="submit" className="auth-btn" disabled={caricamento}>
+            {caricamento ? 'Registrazione in corso...' : 'Registrati'}
+          </button>
 
-        <p>
-          Hai gia' un account? <Link to="/login">Accedi</Link>
-        </p>
-      </form>
+          <p className="auth-footer-text">
+            Hai già un account? <Link to="/login">Accedi</Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
