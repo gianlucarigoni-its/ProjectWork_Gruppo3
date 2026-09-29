@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { validate } from "../../lib/validation-middleware";
-import { find, topUp, transfer } from "./transaction.controller";
-import { Filter, TopUpDto, TransferDto } from "./transaction.dto";
+import { download, find, topUp, transfer } from "./transaction.controller";
+import { DownloadDTO, Filter, TopUpDto, TransferDto } from "./transaction.dto";
 
 const router = Router({ mergeParams: true });
 
@@ -9,6 +9,7 @@ const router = Router({ mergeParams: true });
 router.get("/", validate(Filter, "query"), find);
 router.get("/recenti", validate(Filter, "query"), find); // <-- AGGIUNTA: Risolve l'errore 404 su /api/movimenti/recenti
 
+router.get("/download", validate(DownloadDTO, "query"), download);
 router.post("/transfer", validate(TransferDto, "body"), transfer);
 router.post("/topup", validate(TopUpDto, "body"), topUp);
 

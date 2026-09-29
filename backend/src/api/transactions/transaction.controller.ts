@@ -15,7 +15,7 @@ export const find = async (req: TypedRequest<unknown, Filter>, res: Response, ne
 
 export const download = async (req: TypedRequest<unknown, DownloadDTO>, res: Response, next: NextFunction) => {
   try {
-    const result = await transactionSrv.filter(req.query, req.params.accountId);
+    const result = await transactionSrv.filter(req.query, req.account.id);
     const csv = transactionSrv.buildCsv(result.transactions, result.balance);
 
     res.setHeader("Content-Type", "text/csv; charset=utf-8");

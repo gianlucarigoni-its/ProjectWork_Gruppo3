@@ -9,44 +9,27 @@ import { TransactionLogModel } from "./transacition-log.model";
 
 export class TransactionService {
   async filter(filters: Filter, accountId: string): Promise<TransactionResponse> {
-    let transactions: Transaction[];
     const { limit, category, from, to } = filters;
-    let queryFilter: QueryFilter<Transaction> = { accountId };
-    let num = 0;
-    const account = await AccountModel.findById(accountId).select("balance").exec();
+    const queryFilter: QueryFilter<Transaction> = { accountId };
 
-    if (category == undefined && from == undefined && to == undefined) {
-      if (limit != undefined) {
-        transactions = await TransactionModel.find({ accountId }).sort({ date: -1 }).limit(limit).exec();
-        return {
-          transactions,
-          balance: account?.balance,
-        };
-      } else {
-        transactions = await TransactionModel.find({ accountId }).sort({ date: -1 }).exec();
-        return {
-          transactions,
-          balance: account?.balance,
-        };
-      }
-    } else if (num != undefined) num = limit!;
+    if (category) queryFilter.category = category;
 
-    if (category != undefined) queryFilter.category = category;
-
-    if (from !== undefined || to !== undefined) {
-      queryFilter.date = {};
-
-      if (from !== undefined) {
-        queryFilter.date.$gte = new Date(`${from}T00:00:00.000Z`);
-      }
-
-      if (to !== undefined) {
-        queryFilter.date.$lte = new Date(`${to}T23:59:59.999Z`);
-      }
+    if (from || to) {
+      const dateFilter: { $gte?: Date; $lte?: Date } = {};
+      if (from) dateFilter.$gte = new Date(`${from}T00:00:00.000Z`);
+      if (to) dateFilter.$lte = new Date(`${to}T23:59:59.999Z`);
+      queryFilter.date = dateFilter;
     }
 
-    if (limit === 0) transactions = await TransactionModel.find(queryFilter).sort({ date: -1 });
-    else transactions = await TransactionModel.find(queryFilter).sort({ date: -1 }).limit(num);
+    const query = TransactionModel.find(queryFilter).sort({ date: -1 });
+    if (limit) query.limit(limit);
+    const transactions = await query.exec();
+
+    // Il saldo si restituisce solo per RicercaMovimenti1 (nessun filtro categoria/date)
+    if (!category && !from && !to) {
+      const account = await AccountModel.findById(accountId).select("balance").exec();
+      return { transactions, balance: account?.balance };
+    }
 
     return { transactions };
   }

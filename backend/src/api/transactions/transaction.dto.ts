@@ -27,7 +27,7 @@ export class DownloadDTO {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  num?: number;
+  limit?: number;
 
   @IsOptional()
   @IsEnum(TransactionCategory)

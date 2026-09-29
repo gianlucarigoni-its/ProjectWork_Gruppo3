@@ -2,8 +2,12 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../../utils/services/api';
-import { esportaCsv } from '../../utils/exportCsv';
-import type { Categoria, RigaMovimento, RisultatoRicerca } from '../../types';
+import { TransactionCategory } from '../../types/transaction';
+import type {
+  Transaction,
+  TransactionFilterParams,
+  TransactionResponse,
+} from '../../types/transaction';
 
 const TITOLI: Record<number, string> = {
   1: 'Ultimi movimenti',
@@ -11,34 +15,38 @@ const TITOLI: Record<number, string> = {
   3: 'Movimenti tra due date',
 };
 
+const ETICHETTE_CATEGORIE: Record<TransactionCategory, string> = {
+  accountOpening: 'Apertura conto',
+  incomingTransfer: 'Bonifico in entrata',
+  outgoingTransfer: 'Bonifico in uscita',
+  cashWithdrawal: 'Prelievo contanti',
+  utilityPayment: 'Pagamento utenze',
+  topUp: 'Ricarica telefonica',
+  atmDeposit: 'Versamento ATM',
+};
+
 export default function RicercaMovimentiPage() {
   const { tipo } = useParams<{ tipo: string }>();
   const modo = Number(tipo);
 
   const [n, setN] = useState('10');
-  const [categoriaId, setCategoriaId] = useState('');
+  const [categoria, setCategoria] = useState('');
   const [dal, setDal] = useState('');
   const [al, setAl] = useState('');
-  const [categorie, setCategorie] = useState<Categoria[]>([]);
-  const [movimenti, setMovimenti] = useState<RigaMovimento[] | null>(null);
+  const [movimenti, setMovimenti] = useState<Transaction[] | null>(null);
   const [saldo, setSaldo] = useState<number | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
   const [caricamento, setCaricamento] = useState(false);
+  const [esportando, setEsportando] = useState(false);
 
-  // Cambio di tipo di ricerca: azzero i risultati
+  // Cambio di tipo di ricerca: azzero risultati e filtri
   useEffect(() => {
     setMovimenti(null);
     setSaldo(null);
     setErrore(null);
-  }, [modo]);
-
-  // Lista categorie (solo ricerca 2)
-  useEffect(() => {
-    if (modo !== 2) return;
-    api
-      .get<Categoria[]>('/account/categorie')
-      .then((r) => setCategorie(r.data))
-      .catch(() => setErrore('Impossibile caricare le categorie.'));
+    setCategoria('');
+    setDal('');
+    setAl('');
   }, [modo]);
 
   if (![1, 2, 3].includes(modo)) {
@@ -54,12 +62,23 @@ export default function RicercaMovimentiPage() {
     if (!Number.isInteger(nNum) || nNum < 1) {
       return 'Inserisci un numero di movimenti valido (intero maggiore di 0).';
     }
-    if (modo === 2 && !categoriaId) return 'Seleziona una categoria.';
+    if (modo === 2 && !categoria) return 'Seleziona una categoria.';
     if (modo === 3) {
       if (!dal || !al) return 'Seleziona entrambe le date.';
       if (dal > al) return 'La data iniziale non può essere successiva alla data finale.';
     }
     return null;
+  };
+
+  // Parametri per il backend: gli stessi per ricerca ed export
+  const costruisciParams = (): TransactionFilterParams => {
+    const params: TransactionFilterParams = { limit: Number(n) };
+    if (modo === 2) params.category = categoria as TransactionCategory;
+    if (modo === 3) {
+      params.from = dal;
+      params.to = al;
+    }
+    return params;
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -76,29 +95,41 @@ export default function RicercaMovimentiPage() {
 
     setCaricamento(true);
     try {
-      let url = '/account/ricerca/ultimi';
-      let params: Record<string, string> = { n };
-      if (modo === 2) {
-        url = '/account/ricerca/categoria';
-        params = { n, categoriaId };
-      } else if (modo === 3) {
-        url = '/account/ricerca/date';
-        params = { n, dal, al };
-      }
-
-      const response = await api.get<RisultatoRicerca>(url, { params });
-      const ordinati = [...response.data.movimenti]
-        .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
-        .slice(0, Number(n));
-
-      setMovimenti(ordinati);
-      if (modo === 1 && typeof response.data.saldo === 'number') {
-        setSaldo(response.data.saldo);
+      const response = await api.get<TransactionResponse>('/transactions', {
+        params: costruisciParams(),
+      });
+      setMovimenti(response.data.transactions);
+      // Il backend manda il saldo solo quando non ci sono filtri (ricerca 1)
+      if (modo === 1 && typeof response.data.balance === 'number') {
+        setSaldo(response.data.balance);
       }
     } catch (err: any) {
       setErrore(err?.response?.data?.message || 'Errore durante la ricerca.');
     } finally {
       setCaricamento(false);
+    }
+  };
+
+  const handleEsporta = async () => {
+    setErrore(null);
+    setEsportando(true);
+    try {
+      const response = await api.get('/transactions/download', {
+        params: costruisciParams(),
+        responseType: 'blob',
+      });
+      const url = URL.createObjectURL(response.data as Blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'movimenti.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setErrore("Errore durante l'esportazione del CSV.");
+    } finally {
+      setEsportando(false);
     }
   };
 
@@ -121,11 +152,11 @@ export default function RicercaMovimentiPage() {
         {modo === 2 && (
           <label>
             Categoria
-            <select value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}>
+            <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
               <option value="">-- seleziona --</option>
-              {categorie.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.nomeCategoria}
+              {Object.values(TransactionCategory).map((c) => (
+                <option key={c} value={c}>
+                  {ETICHETTE_CATEGORIE[c]}
                 </option>
               ))}
             </select>
@@ -165,10 +196,10 @@ export default function RicercaMovimentiPage() {
             <span>{movimenti.length} movimenti trovati</span>
             <button
               type="button"
-              disabled={movimenti.length === 0}
-              onClick={() => esportaCsv('movimenti.csv', movimenti)}
+              disabled={movimenti.length === 0 || esportando}
+              onClick={handleEsporta}
             >
-              Esporta CSV
+              {esportando ? 'Esportazione...' : 'Esporta CSV'}
             </button>
           </div>
 
@@ -185,12 +216,13 @@ export default function RicercaMovimentiPage() {
               </thead>
               <tbody>
                 {movimenti.map((m, i) => (
-                  <tr key={m._id ?? m.id ?? i}>
-                    <td>{new Date(m.data).toLocaleDateString('it-IT')}</td>
-                    <td className={m.importo >= 0 ? 'importo-positivo' : 'importo-negativo'}>
-                      {m.importo.toFixed(2)} EUR
+                  <tr key={m.id ?? i}>
+                    <td>{new Date(m.date).toLocaleDateString('it-IT')}</td>
+                    <td className={m.type === 'income' ? 'importo-positivo' : 'importo-negativo'}>
+                      {m.type === 'income' ? '+' : '-'}
+                      {Math.abs(m.amount).toFixed(2)} EUR
                     </td>
-                    <td>{m.categoriaMovimentoId?.nomeCategoria ?? '-'}</td>
+                    <td>{ETICHETTE_CATEGORIE[m.category] ?? m.category}</td>
                   </tr>
                 ))}
               </tbody>
