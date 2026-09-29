@@ -7,7 +7,6 @@ import {
   Wallet,
   ArrowLeftRight,
   Send,
-  Settings,
   LogOut,
   User,
   ShieldCheck,

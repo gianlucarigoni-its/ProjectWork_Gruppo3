@@ -1,4 +1,4 @@
-import { useState, useEffect, Profiler } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api } from "../../utils/services/api";
 import {
@@ -6,7 +6,6 @@ import {
   Wallet,
   ArrowLeftRight,
   Send,
-  Settings,
   LogOut,
   Eye,
   EyeOff,
@@ -58,8 +57,6 @@ export default function HomePage() {
       try {
         // 1. Recupero Dettagli Conto e Profilo (che contengono già le transazioni)
         const resConto = await api.get("/accounts/home", config);
-
-        console.log("RISPOSTA SERVER CONTO:", resConto.data);
 
         if (resConto.data) {
           const dataAccount = resConto.data.account || resConto.data.user || resConto.data;
