@@ -107,10 +107,6 @@ export default function ProfilePage() {
             <Send size={20} />
             <span>Bonifico</span>
           </Link>
-          <Link to="/impostazioni" className="nav-item">
-            <Settings size={20} />
-            <span>Impostazioni</span>
-          </Link>
         </nav>
       </aside>
 
