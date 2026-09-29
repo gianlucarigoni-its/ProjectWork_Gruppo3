@@ -1,100 +1,75 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import logoImg from '../../../public/img/3Vision_DigitalBank_LogoRMBG_white.png'; 
-import '../../styles/login.css'; // Riutilizziamo lo stesso file CSS!
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { api } from '../../utils/services/api';
 
-export default function VerifyEmailPage() {
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState<string>('Stiamo convalidando i tuoi dati...');
+// Se usi TypeScript, definisci l'interfaccia della risposta
+interface VerifyResponse {
+  success: boolean;
+  message: string;
+}
+
+export const ConfermaPage: React.FC = () => {
+  const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState<boolean>(true);
+  const [success, setSuccess] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+
   useEffect(() => {
-    const executeVerification = async () => {
-      const queryParams = new URLSearchParams(window.location.search);
-      const token = queryParams.get('token');
+    if (!token) {
+      setLoading(false);
+      setMessage("Token di verifica non valido o assente.");
+      return;
+    }
 
-      if (!token) {
-        setStatus('error');
-        setMessage('Token di verifica mancante o non valido.');
-        return;
-      }
-
+    const verify = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/auth/verify-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          setStatus('success');
-          setMessage(data.message || 'La tua email è stata confermata con successo.');
-        } else {
-          setStatus('error');
-          setMessage(data.message || 'Il token inserito è scaduto o non è valido.');
-        }
-      } catch (err) {
-        setStatus('error');
-        setMessage('Errore di connessione con il server. Riprova più tardi.');
+        // Chiamata allineata alla tua istanza api (Axios)
+        const response = await api.get<VerifyResponse>(`/auth/verify-email?token=${token}`);
+        
+        // Con Axios, se arrivi qui la chiamata ha restituito un codice 200/2xx
+        setSuccess(true);
+        setMessage(response.data.message || "Email verificata con successo!");
+      } catch (error: any) {
+        setSuccess(false);
+        // Recupera il messaggio d'errore inviato dal backend, altrimenti usa un fallback
+        const errorMessage = error.response?.data?.message || "Token non valido o scaduto.";
+        setMessage(errorMessage);
+      } finally {
+        setLoading(false);
       }
     };
 
-    executeVerification();
-  }, []);
+    verify();
+  }, [token]);
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        {/* Logo Identico al Login */}
-        <div className="auth-brand">
-          <img src={logoImg} alt="3Vision Logo" className="auth-logo-img" />
-        </div>
-
-        {/* CONTENUTO DINAMICO IN BASE ALLO STATO */}
-        {status === 'loading' && (
-          <div className="auth-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-            {/* Se non hai uno spinner globale nel CSS, puoi usare questo div temporaneo */}
-            <div className="spinner-loader" style={{
-              width: '36px', height: '36px', border: '3.5px solid rgba(255,255,255,0.2)',
-              borderTop: '3.5px solid #00a878', borderRadius: '50%', animation: 'spin 0.8s linear infinite'
-            }}></div>
-            <h2>Verifica in corso</h2>
-            <p className="auth-subtitle">{message}</p>
-          </div>
-        )}
-
-        {status === 'success' && (
-          <div className="auth-form" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div className="auth-header">
-              <h2 style={{ color: '#00a878' }}>✓ Conto Attivato!</h2>
-              <p className="auth-subtitle" style={{ marginTop: '10px' }}>{message}</p>
-              <p className="auth-subtitle" style={{ fontSize: '13px', opacity: 0.8 }}>
-                Il tuo conto corrente 3Vision è pronto. Puoi iniziare a gestire le tue finanze.
-              </p>
-            </div>
-            
-            <button type="button" className="auth-btn" onClick={() => navigate('/login')}>
-              Accedi al tuo conto
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
+      <div style={{ padding: "2rem", border: "1px solid #ddd", borderRadius: "8px", textAlign: "center", maxWidth: "400px" }}>
+        {loading ? (
+          <h2>Verifica della mail in corso...</h2>
+        ) : success ? (
+          <>
+            <h2 style={{ color: "green" }}>Email Confermata!</h2>
+            <p>{message}</p>
+            <button 
+              onClick={() => navigate("/login")} 
+              style={{ padding: "10px 20px", marginTop: "15px", cursor: "pointer" }}
+            >
+              Vai al Login
             </button>
-          </div>
-        )}
-
-        {status === 'error' && (
-          <div className="auth-form" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div className="auth-header">
-              <h2 style={{ color: '#ef4444' }}>✕ Attivazione Fallita</h2>
-            </div>
-            
-            <div className="auth-alert error" style={{ margin: '0' }}>{message}</div>
-            
-            <button type="button" className="auth-btn" style={{ backgroundColor: '#475569' }} onClick={() => navigate('/login')}>
-              Torna al Login
-            </button>
-          </div>
+          </>
+        ) : (
+          <>
+            <h2 style={{ color: "red" }}>Verifica Fallita</h2>
+            <p>{message}</p>
+            <Link to="/register">Torna alla pagina di Registrazione</Link>
+          </>
         )}
       </div>
     </div>
   );
-}
+};
+
+export default ConfermaPage;

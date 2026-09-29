@@ -37,27 +37,28 @@ export class MailService {
   async sendVerificationEmail(toEmail: string, token: string): Promise<boolean> {
     try {
       const transporter = this.createTransporter();
-      const baseUrl = process.env.APP_URL || "http://localhost:3000";
-      const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
+      // Usa l'URL del frontend anziché del backend
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      const verifyUrl = `${frontendUrl}/conferma/${token}`;
 
       const info = await transporter.sendMail({
         from: `"Banca ITS" <${process.env.SMTP_USER || process.env.ETHEREAL_USER}>`,
         to: toEmail,
         subject: "Conferma la tua registrazione",
         html: `
-  <h2>Benvenuto!</h2>
-  <p>Clicca il link qui sotto per confermare la tua email e attivare il conto:</p>
-  <a href="${verifyUrl}" style="
-    display: inline-block;
-    padding: 12px 24px;
-    background: #1a73e8;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-  ">Conferma Email</a>
-  <p>Il link scade tra 24 ore.</p>
-  <p>Se non hai richiesto la registrazione, ignora questa mail.</p>
-`,
+        <h2>Benvenuto!</h2>
+        <p>Clicca il link qui sotto per confermare la tua email e attivare il conto:</p>
+        <a href="${verifyUrl}" style="
+          display: inline-block;
+          padding: 12px 24px;
+          background: #1a73e8;
+          color: white;
+          text-decoration: none;
+          border-radius: 4px;
+        ">Conferma Email</a>
+        <p>Il link scade tra 24 ore.</p>
+        <p>Se non hai richiesto la registrazione, ignora questa mail.</p>
+      `,
       });
 
       if (!process.env.SMTP_HOST) {

@@ -101,34 +101,22 @@ export const changePassword = async (req: TypedRequest<ChangePasswordDto>, res: 
 
 export const verifyEmail = async (req: TypedRequest<unknown, VerifyEmailDto>, res: Response, next: NextFunction) => {
   try {
+    // Può arrivare dalla query string o dal body a seconda del DTO
     const verifyToken = req.query.token;
-
-    if (!verifyToken || typeof verifyToken !== "string") {
-      throw new Error("Token di verifica non valido");
-    }
 
     const verify = await authSrv.verifyEmail(verifyToken);
 
-    if (!verify) {
-      throw new Error("Token non valido o scaduto");
-    }
+    if (!verify) throw new Error("Token non valido o scaduto");
 
     const account = await authSrv.openAccount(verify.accountId);
 
-    if (!account) {
-      throw new Error("Impossibile aprire il conto");
-    }
+    if (!account) throw new Error("Impossibile creare conto corrente");
 
-    const ip = authSrv.getClientIp(req.headers, req.socket, req.ip);
-    const logData: AuthLog = {
-      accountId: verify.accountId,
-      ipAddress: ip,
-      type: AuthType.login,
-      status: AuthStatus.success,
-    };
-    await AuthLogModel.create(logData);
-
-    return res.redirect(`${process.env.FRONTEND_URL}/verify-email`);
+    // Risposta JSON al frontend
+    res.status(200).json({
+      success: true,
+      message: "Email verificata e conto attivato con successo!",
+    });
   } catch (err) {
     next(err);
   }

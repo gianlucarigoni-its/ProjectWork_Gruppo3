@@ -89,21 +89,21 @@ export class AuthService {
   async verifyEmail(token: string): Promise<{ accountId: string } | null> {
     const identity = await UserIdentityModel.findOne({
       verificationToken: token,
-      verificationTokenExpiry: { $gt: new Date() }, // non scaduto
+      verificationTokenExpiry: { $gt: new Date() },
       isVerified: false,
     });
 
-    if (!identity) return null; //InvalidTokenError();
+    if (!identity) return null;
+
+    // Estraiamo l'ID pulito dall'oggetto account (sia che sia popolato o meno)
+    const accountObj = identity.account as any;
+    const accountId = accountObj._id ? accountObj._id.toString() : accountObj.toString();
 
     identity.isVerified = true;
     identity.verificationToken = null;
     identity.verificationTokenExpiry = null;
     await identity.save();
 
-    const accountId = (identity.account as unknown as Account).id;
-    const username = (identity.account as unknown as Account).username;
-    const password = await this.getHashedPasswordById(accountId);
-    if (!password) return null;
     return { accountId };
   }
 
@@ -114,12 +114,10 @@ export class AuthService {
       description: "Apertura conto",
       category: TransactionCategory.AccountOpening,
       type: TransactionType.Income,
-      date: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      date: new Date(), // usa la data corrente per il movimento di apertura
     });
 
-    if (!transaction) return false;
-
-    return true;
+    return !!transaction;
   }
 }
 
