@@ -1,26 +1,25 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import { 
-  Home, 
-  Wallet, 
-  ArrowLeftRight, 
-  Send, 
-  Settings, 
-  LogOut, 
-  Eye, 
-  EyeOff, 
-  ChevronRight 
-} from 'lucide-react';
-import logoImg from '../../../public/img/3Vision_DigitalBank_LogoRMBG_white.png';
-
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { api } from "../../utils/services/api";
+import {
+  Home,
+  Wallet,
+  ArrowLeftRight,
+  Send,
+  Settings,
+  LogOut,
+  Eye,
+  EyeOff,
+  ChevronRight,
+} from "lucide-react";
+import logoImg from "../../../public/img/3Vision_DigitalBank_LogoRMBG_white.png";
 
 interface Movimento {
   id: number;
   descrizione: string;
   data: string;
   importo: number | string;
-  tipo: 'positivo' | 'negativo';
+  tipo: "positivo" | "negativo";
 }
 
 export default function HomePage() {
@@ -29,89 +28,94 @@ export default function HomePage() {
   const [menuProfiloAperto, setMenuProfiloAperto] = useState(false);
 
   // Stati per i dati dal DB
-  const [nomeTitolare, setNomeTitolare] = useState<string>('');
-  const [cognomeTitolare, setCognomeTitolare] = useState<string>('');
+  const [nomeTitolare, setNomeTitolare] = useState<string>("");
+  const [cognomeTitolare, setCognomeTitolare] = useState<string>("");
   const [saldoValore, setSaldoValore] = useState<number>(0);
   const [movimentiRecenti, setMovimentiRecenti] = useState<Movimento[]>([]);
-  
+
   const [caricamento, setCaricamento] = useState<boolean>(true);
   const [errore, setErrore] = useState<string | null>(null);
 
   useEffect(() => {
-  const caricaDatiDashboard = async () => {
-    setCaricamento(true);
-    setErrore(null);
+    const caricaDatiDashboard = async () => {
+      setCaricamento(true);
+      setErrore(null);
 
-    const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
 
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    try {
-      // 1. Recupero Dettagli Conto e Profilo (che contengono già le transazioni)
-      const resConto = await axios.get('http://localhost:3000/api/conto/dettagli', config);
-      
-      console.log("RISPOSTA SERVER CONTO:", resConto.data);
-
-      if (resConto.data) {
-        const dataAccount = resConto.data.account || resConto.data.user || resConto.data;
-
-        const nome = dataAccount.firstName || dataAccount.nome || dataAccount.username || '';
-        const cognome = dataAccount.lastName || dataAccount.cognome || '';
-        const saldo = dataAccount.balance ?? dataAccount.saldo ?? dataAccount.saldoDisponibile ?? 0;
-
-        setNomeTitolare(nome);
-        setCognomeTitolare(cognome);
-        setSaldoValore(Number(saldo));
-
-        // Estrae le transazioni già restituite da resConto.data
-        const listaMovimenti = resConto.data.transactions || dataAccount.transactions || [];
-
-        const movimentiFormattati = listaMovimenti.map((m: any) => ({
-          id: m.id || m._id,
-          descrizione: m.descrizione || m.description || m.type || 'Movimento',
-          data: m.data ? new Date(m.data).toLocaleDateString('it-IT') : (m.createdAt ? new Date(m.createdAt).toLocaleDateString('it-IT') : ''),
-          importo: m.importo ?? m.amount ?? 0,
-          tipo: m.tipo || (Number(m.importo ?? m.amount) >= 0 ? 'positivo' : 'negativo')
-        }));
-
-        setMovimentiRecenti(movimentiFormattati);
-      }
-    } catch (err: any) {
-      console.error('Errore recupero dettagli conto:', err);
-      if (err.response?.status === 401) {
-        localStorage.clear();
-        navigate('/login');
+      if (!token) {
+        navigate("/login");
         return;
       }
-      if (!err.response || err.response.status >= 500) {
-        setErrore('Impossibile connettersi al server per recuperare i dati.');
-      }
-    } finally {
-      setCaricamento(false);
-    }
-  };
 
-  caricaDatiDashboard();
-}, [navigate]);
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      try {
+        // 1. Recupero Dettagli Conto e Profilo (che contengono già le transazioni)
+        const resConto = await api.get("/accounts/home", config);
+
+        console.log("RISPOSTA SERVER CONTO:", resConto.data);
+
+        if (resConto.data) {
+          const dataAccount = resConto.data.account || resConto.data.user || resConto.data;
+
+          const nome = dataAccount.firstName || dataAccount.nome || dataAccount.username || "";
+          const cognome = dataAccount.lastName || dataAccount.cognome || "";
+          const saldo =
+            dataAccount.balance ?? dataAccount.saldo ?? dataAccount.saldoDisponibile ?? 0;
+
+          setNomeTitolare(nome);
+          setCognomeTitolare(cognome);
+          setSaldoValore(Number(saldo));
+
+          // Estrae le transazioni già restituite da resConto.data
+          const listaMovimenti = resConto.data.transactions || dataAccount.transactions || [];
+
+          const movimentiFormattati = listaMovimenti.map((m: any) => ({
+            id: m.id || m._id,
+            descrizione: m.descrizione || m.description || m.type || "Movimento",
+            data: m.data
+              ? new Date(m.data).toLocaleDateString("it-IT")
+              : m.createdAt
+                ? new Date(m.createdAt).toLocaleDateString("it-IT")
+                : "",
+            importo: m.importo ?? m.amount ?? 0,
+            tipo: m.tipo || (Number(m.importo ?? m.amount) >= 0 ? "positivo" : "negativo"),
+          }));
+
+          setMovimentiRecenti(movimentiFormattati);
+        }
+      } catch (err: any) {
+        console.error("Errore recupero dettagli conto:", err);
+        if (err.response?.status === 401) {
+          localStorage.clear();
+          navigate("/login");
+          return;
+        }
+        if (!err.response || err.response.status >= 500) {
+          setErrore("Impossibile connettersi al server per recuperare i dati.");
+        }
+      } finally {
+        setCaricamento(false);
+      }
+    };
+
+    caricaDatiDashboard();
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login');
+    navigate("/login");
   };
 
   const formattaValuta = (valore: number) => {
-    return new Intl.NumberFormat('it-IT', {
-      style: 'currency',
-      currency: 'EUR',
+    return new Intl.NumberFormat("it-IT", {
+      style: "currency",
+      currency: "EUR",
     }).format(valore);
   };
 
@@ -153,22 +157,29 @@ export default function HomePage() {
         <header className="top-navbar">
           <div className="navbar-right">
             <div className="profile-wrapper">
-              <button 
-                className="profile-btn" 
+              <button
+                className="profile-btn"
                 onClick={() => setMenuProfiloAperto(!menuProfiloAperto)}
               >
                 <div className="avatar">
-                  {nomeTitolare ? nomeTitolare[0].toUpperCase() : 'U'}{cognomeTitolare ? cognomeTitolare[0].toUpperCase() : ''}
+                  {nomeTitolare[0]}
+                  {cognomeTitolare[0]}
                 </div>
               </button>
 
               {menuProfiloAperto && (
                 <div className="profile-dropdown">
                   <div className="dropdown-user-info">
-                    <p className="user-name">{nomeTitolare} {cognomeTitolare}</p>
+                    <Link
+                      to="/profilo"
+                      className="user-name"
+                      onClick={() => setMenuProfiloAperto(false)}
+                    >
+                      {nomeTitolare} {cognomeTitolare}
+                    </Link>
                   </div>
                   <hr />
-                  <button onClick={() => navigate('/impostazioni')} className="dropdown-item">
+                  <button onClick={() => navigate("/impostazioni")} className="dropdown-item">
                     <Settings size={16} />
                     <span>Impostazioni</span>
                   </button>
@@ -185,12 +196,22 @@ export default function HomePage() {
         {/* Corpo Dashboard */}
         <div className="dashboard-body">
           <div className="welcome-header">
-            <h1>Benvenuto, {nomeTitolare} {cognomeTitolare}</h1>
+            <h1>
+              Benvenuto, {nomeTitolare} {cognomeTitolare}
+            </h1>
             <p>Ecco la panoramica aggiornata del tuo conto</p>
           </div>
 
           {errore && (
-            <div style={{ color: '#f87171', padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', marginBottom: '1rem' }}>
+            <div
+              style={{
+                color: "#f87171",
+                padding: "0.75rem",
+                background: "rgba(239, 68, 68, 0.1)",
+                borderRadius: "8px",
+                marginBottom: "1rem",
+              }}
+            >
               {errore}
             </div>
           )}
@@ -201,8 +222,8 @@ export default function HomePage() {
               <div className="balance-card">
                 <div className="balance-header">
                   <span>Saldo disponibile</span>
-                  <button 
-                    className="eye-toggle-btn" 
+                  <button
+                    className="eye-toggle-btn"
                     onClick={() => setMostraSaldo(!mostraSaldo)}
                     title={mostraSaldo ? "Nascondi saldo" : "Mostra saldo"}
                   >
@@ -210,13 +231,11 @@ export default function HomePage() {
                   </button>
                 </div>
                 <div className="balance-amount">
-                  {caricamento ? (
-                    'Caricamento...'
-                  ) : mostraSaldo ? (
-                    formattaValuta(saldoValore)
-                  ) : (
-                    '•••••••• €'
-                  )}
+                  {caricamento
+                    ? "Caricamento..."
+                    : mostraSaldo
+                      ? formattaValuta(saldoValore)
+                      : "•••••••• €"}
                 </div>
               </div>
 
@@ -230,7 +249,7 @@ export default function HomePage() {
                 </div>
                 <div className="transactions-list">
                   {caricamento ? (
-                    <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>Caricamento in corso...</p>
+                    <p style={{ color: "#9ca3af", fontSize: "0.9rem" }}>Caricamento in corso...</p>
                   ) : movimentiRecenti.length > 0 ? (
                     movimentiRecenti.slice(0, 5).map((item) => (
                       <div key={item.id} className="transaction-item">
@@ -239,14 +258,16 @@ export default function HomePage() {
                           <span className="tx-date">{item.data}</span>
                         </div>
                         <span className={`tx-amount ${item.tipo}`}>
-                          {mostraSaldo 
-                            ? (typeof item.importo === 'number' ? formattaValuta(item.importo) : item.importo) 
-                            : '•••• €'}
+                          {mostraSaldo
+                            ? typeof item.importo === "number"
+                              ? formattaValuta(item.importo)
+                              : item.importo
+                            : "•••• €"}
                         </span>
                       </div>
                     ))
                   ) : (
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem', padding: '0.5rem 0' }}>
+                    <p style={{ color: "#9ca3af", fontSize: "0.875rem", padding: "0.5rem 0" }}>
                       Nessun movimento trovato nel conto.
                     </p>
                   )}
@@ -259,21 +280,21 @@ export default function HomePage() {
               <div className="quick-actions-card">
                 <h3>Azioni rapide</h3>
                 <div className="quick-actions-grid">
-                  <button onClick={() => navigate('/bonifico')} className="action-btn">
+                  <button onClick={() => navigate("/bonifico")} className="action-btn">
                     <div className="action-icon orange">
                       <Send size={22} />
                     </div>
                     <span>Bonifico</span>
                   </button>
 
-                  <button onClick={() => navigate('/ricarica')} className="action-btn">
+                  <button onClick={() => navigate("/ricarica")} className="action-btn">
                     <div className="action-icon green">
                       <Wallet size={22} />
                     </div>
                     <span>Ricarica</span>
                   </button>
 
-                  <button onClick={() => navigate('/movimenti')} className="action-btn">
+                  <button onClick={() => navigate("/movimenti")} className="action-btn">
                     <div className="action-icon dark">
                       <ArrowLeftRight size={22} />
                     </div>

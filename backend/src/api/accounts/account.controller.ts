@@ -12,10 +12,9 @@ export const home = async (req: TypedRequest, res: Response, next: NextFunction)
   }
 };
 
-export const getAccountById = async (req: TypedRequest, res: Response, next: NextFunction) => {
+export const profile = async (req: TypedRequest, res: Response, next: NextFunction) => {
   try {
-    const id = req.params.accountId || (req as any).user?.id;
-    const account = await accountSrv.getAccountById(id);
+    const account = await accountSrv.getAccountById(req.account.id);
     res.status(200).json(account);
   } catch (err) {
     next(err);

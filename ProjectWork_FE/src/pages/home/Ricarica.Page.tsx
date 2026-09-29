@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { api } from '../../utils/services/api';
 
 
 export interface RicaricaPayload {
@@ -136,19 +137,13 @@ export default function RicaricaPage() {
   const handleRicaricaSubmit = async (payload: RicaricaPayload) => {
     setIsLoading(true);
     setResultMessage(null);
-
+    
     try {
-      const response = await fetch('/api/operations/ricarica', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      // Inviando direttamente payload come secondo argomento
+      const response = await api.post('/operations/ricarica', payload);
+      const data = response.data;
+    
+      if (data.success) {
         setResultMessage({
           type: 'success',
           text: `Ricarica di ${payload.amount}€ eseguita con successo su ${payload.phoneNumber}!`,
@@ -160,10 +155,10 @@ export default function RicaricaPage() {
           text: data.message || 'Si è verificato un errore durante la ricarica.',
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       setResultMessage({
         type: 'error',
-        text: 'Errore di connessione con il server. Riprova più tardi.',
+        text: err.response?.data?.message || 'Errore di connessione con il server. Riprova più tardi.',
       });
     } finally {
       setIsLoading(false);
