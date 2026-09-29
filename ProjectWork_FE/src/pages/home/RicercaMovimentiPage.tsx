@@ -1,15 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-  Home,
-  Wallet,
-  ArrowLeftRight,
-  Tag,
-  CalendarRange,
-  Send,
-  Settings,
-} from 'lucide-react';
+import { Home, Wallet, ArrowLeftRight, Send, Settings } from 'lucide-react';
 import { api } from '../../utils/services/api';
 import { TransactionCategory } from '../../types/transaction';
 import type {
@@ -17,13 +9,13 @@ import type {
   TransactionFilterParams,
   TransactionResponse,
 } from '../../types/transaction';
+import './ricerca.css';
 
-
-const TITOLI: Record<number, string> = {
-  1: 'Ultimi movimenti',
-  2: 'Movimenti per categoria',
-  3: 'Movimenti tra due date',
-};
+const SCHEDE: { modo: number; titolo: string }[] = [
+  { modo: 1, titolo: 'Ultimi movimenti' },
+  { modo: 2, titolo: 'Per categoria' },
+  { modo: 3, titolo: 'Tra due date' },
+];
 
 const ETICHETTE_CATEGORIE: Record<TransactionCategory, string> = {
   accountOpening: 'Apertura conto',
@@ -39,8 +31,11 @@ const formattaValuta = (valore: number) =>
   new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(valore);
 
 export default function RicercaMovimentiPage() {
+  // Se si arriva da /ricerca/2 la scheda iniziale è la 2, altrimenti la 1
   const { tipo } = useParams<{ tipo: string }>();
-  const modo = Number(tipo);
+  const [modo, setModo] = useState<number>(
+    [1, 2, 3].includes(Number(tipo)) ? Number(tipo) : 1,
+  );
 
   const [n, setN] = useState('10');
   const [categoria, setCategoria] = useState('');
@@ -52,7 +47,7 @@ export default function RicercaMovimentiPage() {
   const [caricamento, setCaricamento] = useState(false);
   const [esportando, setEsportando] = useState(false);
 
-  // Cambio di tipo di ricerca: azzero risultati e filtri
+  // Cambio scheda: azzero risultati e filtri
   useEffect(() => {
     setMovimenti(null);
     setSaldo(null);
@@ -104,7 +99,7 @@ export default function RicercaMovimentiPage() {
         params: costruisciParams(),
       });
       setMovimenti(response.data.transactions);
-      // Il backend manda il saldo solo quando non ci sono filtri (ricerca 1)
+      // Il backend manda il saldo solo quando non ci sono filtri (scheda 1)
       if (modo === 1 && typeof response.data.balance === 'number') {
         setSaldo(response.data.balance);
       }
@@ -138,73 +133,55 @@ export default function RicercaMovimentiPage() {
     }
   };
 
-  const sidebar = (
-    <aside className="sidebar">
-      <div className="sidebar-logo">
-        <img src="/img/3Vision_DigitalBank_LogoRMBG_white.png" alt="3Vision Logo" />
-      </div>
-
-      <nav className="sidebar-nav">
-        <Link to="/home" className="nav-item">
-          <Home size={20} />
-          <span>Home</span>
-        </Link>
-        <Link to="/ricarica" className="nav-item">
-          <Wallet size={20} />
-          <span>Ricarica</span>
-        </Link>
-
-        <div className="sidebar-section">Movimenti</div>
-        <Link to="/ricerca/1" className={`nav-item ${modo === 1 ? 'active' : ''}`}>
-          <ArrowLeftRight size={20} />
-          <span>Ultimi movimenti</span>
-        </Link>
-        <Link to="/ricerca/2" className={`nav-item ${modo === 2 ? 'active' : ''}`}>
-          <Tag size={20} />
-          <span>Per categoria</span>
-        </Link>
-        <Link to="/ricerca/3" className={`nav-item ${modo === 3 ? 'active' : ''}`}>
-          <CalendarRange size={20} />
-          <span>Tra due date</span>
-        </Link>
-
-        <div className="sidebar-section">Altro</div>
-        <Link to="/bonifico" className="nav-item">
-          <Send size={20} />
-          <span>Bonifico</span>
-        </Link>
-        <Link to="/impostazioni" className="nav-item">
-          <Settings size={20} />
-          <span>Impostazioni</span>
-        </Link>
-      </nav>
-    </aside>
-  );
-
-  if (![1, 2, 3].includes(modo)) {
-    return (
-      <div className="dashboard-container">
-        {sidebar}
-        <main className="main-content">
-          <div className="dashboard-body">
-            <p className="ricerca-error">
-              Ricerca non valida. <Link to="/home">Torna alla Home</Link>
-            </p>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   return (
     <div className="dashboard-container">
-      {sidebar}
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <img src="/img/3Vision_DigitalBank_LogoRMBG_white.png" alt="3Vision Logo" />
+        </div>
+
+        <nav className="sidebar-nav">
+          <Link to="/home" className="nav-item">
+            <Home size={20} />
+            <span>Home</span>
+          </Link>
+          <Link to="/ricarica" className="nav-item">
+            <Wallet size={20} />
+            <span>Ricarica</span>
+          </Link>
+          <Link to="/movimenti" className="nav-item active">
+            <ArrowLeftRight size={20} />
+            <span>Movimenti</span>
+          </Link>
+          <Link to="/bonifico" className="nav-item">
+            <Send size={20} />
+            <span>Bonifico</span>
+          </Link>
+          <Link to="/impostazioni" className="nav-item">
+            <Settings size={20} />
+            <span>Impostazioni</span>
+          </Link>
+        </nav>
+      </aside>
 
       <main className="main-content">
         <div className="dashboard-body">
           <div className="welcome-header">
-            <h1>{TITOLI[modo]}</h1>
+            <h1>Movimenti</h1>
             <p>Cerca i movimenti del tuo conto ed esportali in CSV</p>
+          </div>
+
+          <div className="ricerca-tabs">
+            {SCHEDE.map((s) => (
+              <button
+                key={s.modo}
+                type="button"
+                className={`ricerca-tab ${modo === s.modo ? 'active' : ''}`}
+                onClick={() => setModo(s.modo)}
+              >
+                {s.titolo}
+              </button>
+            ))}
           </div>
 
           <div className="ricerca-card">

@@ -155,3 +155,34 @@
   letter-spacing: 0.06em;
   color: #6b7280;
 }
+
+/* Schede di selezione del tipo di ricerca */
+.ricerca-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.ricerca-tab {
+  padding: 0.6rem 1.2rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  color: #9ca3af;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ricerca-tab:hover {
+  color: #ffffff;
+  border-color: #f97316;
+}
+
+.ricerca-tab.active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(249, 115, 22, 0.15) 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #10b981;
+}

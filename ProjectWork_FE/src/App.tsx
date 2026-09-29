@@ -42,6 +42,7 @@ function App() {
       <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
       <Route path="/movimento/:id" element={<ProtectedRoute><MovimentoDettaglioPage /></ProtectedRoute>} />
       <Route path="/ricerca/:tipo" element={<ProtectedRoute><RicercaMovimentiPage /></ProtectedRoute>} />
+      <Route path="/movimenti" element={<ProtectedRoute><RicercaMovimentiPage /></ProtectedRoute>} />
       <Route path="/modifica-password" element={<ProtectedRoute><ModificaPasswordPage /></ProtectedRoute>} />
       
       {/* Rotta Movimenti / Transactions */}
