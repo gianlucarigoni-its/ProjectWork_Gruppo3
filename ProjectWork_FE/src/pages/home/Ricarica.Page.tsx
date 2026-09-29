@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../../styles/_ricarica.scss';
+
 
 export interface RicaricaPayload {
   phoneNumber: string;

@@ -1,0 +1,54 @@
+// ==========================================
+// DESIGN TOKENS & PALETTE COLORI (Dark Bank)
+// ==========================================
+
+// Sfondi
+$bg-dark: #0d1117;
+$bg-card: #161b22;
+$bg-card-hover: #21262d;
+$bg-input: #21262d;
+
+// Brand & Accenti
+$accent-green: #10b981;
+$accent-green-hover: #059669;
+$accent-orange: #f97316;
+$accent-orange-hover: #ea580c;
+$gradient-brand: linear-gradient(135deg, $accent-green 0%, $accent-orange 100%);
+$gradient-bg-auth: linear-gradient(135deg, #092e20 0%, #0d1117 50%, #4a1d08 100%);
+$gradient-balance-card: linear-gradient(135deg, #0f382c 0%, #161b22 60%, #3b1708 100%);
+
+// Testo
+$text-main: #f3f4f6;
+$text-white: #ffffff;
+$text-muted: #9ca3af;
+$text-dark-label: #d1d5db;
+
+// Bordi & Stati
+$border-color: #30363d;
+$border-input: #363b42;
+$error-color: #f87171;
+$error-bg: rgba(239, 68, 68, 0.15);
+$success-color: #34d399;
+$success-bg: rgba(16, 185, 129, 0.15);
+
+// Dimensioni
+$sidebar-width: 240px;
+$topbar-height: 70px;
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 14px;
+$transition: all 0.2s ease;
+
+// Mixin per Flexbox Centrato
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Mixin Responsive
+@mixin mobile {
+  @media (max-width: 900px) {
+    @content;
+  }
+}

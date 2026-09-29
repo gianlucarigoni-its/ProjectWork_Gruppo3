@@ -13,7 +13,7 @@ import {
   ChevronRight 
 } from 'lucide-react';
 import logoImg from '../../../public/img/3Vision_DigitalBank_LogoRMBG_white.png';
-import './home.css';
+
 
 interface Movimento {
   id: number;

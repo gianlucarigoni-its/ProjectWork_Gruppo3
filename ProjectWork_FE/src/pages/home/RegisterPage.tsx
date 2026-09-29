@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../utils/services/authService';
 import logoImg from '../../../public/img/3Vision_DigitalBank_LogoRMBG_white.png';
-import '../../styles/login.css';
+
 
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const REGEX_PASSWORD = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;

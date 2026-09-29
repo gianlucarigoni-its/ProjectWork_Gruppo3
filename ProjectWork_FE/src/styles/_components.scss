@@ -1,0 +1,92 @@
+@use 'variables' as *;
+
+// Form & Input Generici
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  label, .form-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: $text-dark-label;
+  }
+
+  input, select, .form-input {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    background: $bg-input;
+    border: 1px solid $border-input;
+    border-radius: $radius-sm;
+    color: $text-white;
+    font-size: 0.9rem;
+    outline: none;
+    transition: $transition;
+
+    &::placeholder {
+      color: #6e7681;
+    }
+
+    &:focus {
+      border-color: $accent-orange;
+      box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+    }
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+// Card Base
+.ui-card {
+  background: $bg-card;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  padding: 1.5rem;
+}
+
+// Bottoni Generici
+.btn-primary {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, $accent-green 0%, $accent-green-hover 100%);
+  color: $text-white;
+  border: none;
+  border-radius: $radius-sm;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: $transition;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.1);
+    background: linear-gradient(135deg, $accent-green 0%, $accent-orange-hover 100%);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Alert / Messaggi di stato
+.alert {
+  padding: 0.65rem 0.85rem;
+  border-radius: $radius-sm;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+
+  &.alert-error, &.error {
+    background: $error-bg;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: $error-color;
+  }
+
+  &.alert-success, &.success {
+    background: $success-bg;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: $success-color;
+  }
+}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { TransactionCategory } from "../types/transaction";
 import type { Transaction, TransactionFilterParams } from "../types/transaction";
 import { getTransactions } from "../utils/services/Transaction.service";
-import "../styles/_transictionList.scss";
+
 
 interface TransactionsListProps {
   accountId: string;

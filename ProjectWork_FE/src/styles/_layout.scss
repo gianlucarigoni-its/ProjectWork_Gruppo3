@@ -1,0 +1,162 @@
+@use 'variables' as *;
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: $bg-dark;
+  color: $text-main;
+}
+
+// Sidebar Sinistra
+.sidebar {
+  width: $sidebar-width;
+  background: $bg-card;
+  border-right: 1px solid $border-color;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  position: fixed;
+  height: 100vh;
+  z-index: 10;
+
+  .sidebar-logo {
+    @include flex-center;
+    margin-bottom: 2rem;
+
+    img {
+      height: 45px;
+      width: auto;
+    }
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.8rem 1rem;
+      color: $text-muted;
+      border-radius: $radius-sm;
+      font-weight: 500;
+      transition: $transition;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: $text-white;
+      }
+
+      &.active {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(249, 115, 22, 0.15) 100%);
+        color: $accent-green;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+    }
+  }
+}
+
+// Area Principale
+.main-content {
+  flex: 1;
+  margin-left: $sidebar-width;
+  display: flex;
+  flex-direction: column;
+
+  @include mobile {
+    margin-left: 0;
+  }
+}
+
+// Topbar
+.top-navbar {
+  height: $topbar-height;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 2rem;
+  border-bottom: 1px solid $border-color;
+  background: $bg-card;
+
+  .profile-wrapper {
+    position: relative;
+
+    .profile-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: $gradient-brand;
+      color: $text-white;
+      font-weight: 700;
+      @include flex-center;
+      font-size: 0.95rem;
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      top: 52px;
+      right: 0;
+      width: 200px;
+      background: $bg-card;
+      border: 1px solid $border-color;
+      border-radius: $radius-md;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      padding: 0.5rem;
+      z-index: 100;
+
+      .dropdown-user-info {
+        padding: 0.5rem;
+        
+        .user-name {
+          margin: 0;
+          font-weight: 600;
+          font-size: 0.9rem;
+          color: $text-white;
+        }
+      }
+
+      hr {
+        border: none;
+        border-top: 1px solid $border-color;
+        margin: 0.4rem 0;
+      }
+
+      .dropdown-item {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.6rem;
+        background: transparent;
+        border: none;
+        color: $text-dark-label;
+        font-size: 0.85rem;
+        border-radius: $radius-sm;
+        cursor: pointer;
+        text-align: left;
+
+        &:hover {
+          background: $bg-card-hover;
+        }
+
+        &.logout {
+          color: $error-color;
+        }
+      }
+    }
+  }
+}
+
+.dashboard-body {
+  padding: 2rem;
+  max-width: 1200px;
+}

@@ -1,0 +1,85 @@
+@use 'variables' as *;
+
+.auth-page {
+  min-height: 100vh;
+  @include flex-center;
+  background: $gradient-bg-auth;
+  padding: 1rem;
+
+  .auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: $bg-card;
+    border: 1px solid $border-color;
+    border-radius: $radius-lg;
+    padding: 1.5rem 1.75rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+
+    .auth-brand {
+      @include flex-center;
+      margin-bottom: 0.5rem;
+
+      .auth-logo-img {
+        height: 48px;
+        width: auto;
+        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+      }
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 1rem;
+
+      h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+        color: $text-white;
+      }
+
+      .auth-subtitle {
+        font-size: 0.8rem;
+        color: $text-muted;
+      }
+
+      .timer-badge {
+        display: inline-block;
+        margin-top: 0.5rem;
+        padding: 0.25rem 0.65rem;
+        background: rgba(249, 115, 22, 0.1);
+        border: 1px solid rgba(249, 115, 22, 0.3);
+        border-radius: 20px;
+        font-size: 0.75rem;
+        color: #fb923c;
+
+        &.warning {
+          background: $error-bg;
+          border-color: rgba(239, 68, 68, 0.4);
+          color: $error-color;
+        }
+      }
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .auth-footer-text {
+      text-align: center;
+      font-size: 0.8rem;
+      color: $text-muted;
+      margin-top: 0.5rem;
+
+      a {
+        color: $accent-orange;
+        font-weight: 600;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}

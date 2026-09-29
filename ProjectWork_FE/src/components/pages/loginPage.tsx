@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
 import logoImg from '../../../public/img/3Vision_DigitalBank_LogoRMBG_white.png'; 
-import '../../styles/login.css';
+
 
 const TEMPO_LIMITE_SECONDI = 30;
 

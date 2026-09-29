@@ -1,0 +1,129 @@
+@use 'variables' as *;
+
+// Pagina Ricarica / Bonifico
+.ricarica-page-container {
+  max-width: 580px;
+  margin: 20px auto;
+
+  .ricarica-card-wrapper {
+    background: $bg-card;
+    border-radius: $radius-lg;
+    padding: 2rem;
+    border: 1px solid $border-color;
+
+    .ricarica-header {
+      margin-bottom: 1.5rem;
+      text-align: center;
+
+      h1 {
+        font-size: 1.5rem;
+        color: $text-white;
+        margin-bottom: 0.25rem;
+      }
+
+      p {
+        color: $text-muted;
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  .operator-grid, .amount-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+
+    .operator-card, .amount-card {
+      padding: 0.75rem 0.5rem;
+      border: 1px solid $border-input;
+      border-radius: $radius-sm;
+      background: $bg-input;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: $text-main;
+      transition: $transition;
+      text-align: center;
+
+      &:hover {
+        border-color: $accent-orange;
+      }
+
+      &.active {
+        border-color: $accent-green;
+        background: rgba(16, 185, 129, 0.15);
+        color: $accent-green;
+      }
+    }
+  }
+}
+
+// Pagina Lista Movimenti & Filtri
+.transactions-container {
+  padding: 1rem 0;
+
+  .filters-card {
+    background: $bg-card;
+    border-radius: $radius-lg;
+    padding: 1.5rem;
+    border: 1px solid $border-color;
+    margin-bottom: 1.5rem;
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .filters-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+
+  .table-card {
+    background: $bg-card;
+    border-radius: $radius-lg;
+    border: 1px solid $border-color;
+    overflow: hidden;
+
+    .transactions-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+
+      th {
+        background: $bg-card-hover;
+        color: $text-muted;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid $border-color;
+      }
+
+      td {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid $border-color;
+        font-size: 0.9rem;
+        color: $text-white;
+      }
+
+      tbody tr:hover {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .amount-income {
+        color: $accent-green;
+        font-weight: 700;
+      }
+
+      .amount-outcome {
+        color: $error-color;
+        font-weight: 700;
+      }
+    }
+  }
+}
