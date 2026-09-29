@@ -1,129 +1,203 @@
 @use 'variables' as *;
 
-// Pagina Ricarica / Bonifico
-.ricarica-page-container {
-  max-width: 580px;
-  margin: 20px auto;
+/* ==========================================================================
+   RICERCA MOVIMENTI & TABELLE
+   ========================================================================== */
 
-  .ricarica-card-wrapper {
+// Tabs per tipo ricerca
+.ricerca-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+
+  .ricerca-tab {
+    padding: 0.6rem 1.2rem;
     background: $bg-card;
-    border-radius: $radius-lg;
-    padding: 2rem;
     border: 1px solid $border-color;
+    border-radius: $radius-md;
+    color: $text-muted;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: $transition;
 
-    .ricarica-header {
-      margin-bottom: 1.5rem;
-      text-align: center;
+    &:hover {
+      color: $text-white;
+      border-color: $accent-orange;
+    }
 
-      h1 {
-        font-size: 1.5rem;
-        color: $text-white;
-        margin-bottom: 0.25rem;
-      }
-
-      p {
-        color: $text-muted;
-        font-size: 0.875rem;
-      }
+    &.active {
+      background: linear-gradient(135deg, rgba($accent-green, 0.15) 0%, rgba($accent-orange, 0.15) 100%);
+      border-color: rgba($accent-green, 0.4);
+      color: $accent-green;
     }
   }
+}
 
-  .operator-grid, .amount-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+// Card contenitore form ricerca
+.ricerca-card {
+  background: $bg-card;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
 
-    .operator-card, .amount-card {
-      padding: 0.75rem 0.5rem;
-      border: 1px solid $border-input;
-      border-radius: $radius-sm;
-      background: $bg-input;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
+// Form di ricerca
+.ricerca-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+
+  .ricerca-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: $text-muted;
+
+    input,
+    select {
+      min-width: 180px;
+      padding: 0.65rem 0.8rem;
+      background: $bg-dark;
+      border: 1px solid $border-color;
+      border-radius: $radius-md;
       color: $text-main;
+      font-size: 0.95rem;
+      outline: none;
+      color-scheme: dark;
       transition: $transition;
-      text-align: center;
 
-      &:hover {
+      &:focus {
         border-color: $accent-orange;
-      }
-
-      &.active {
-        border-color: $accent-green;
-        background: rgba(16, 185, 129, 0.15);
-        color: $accent-green;
       }
     }
   }
 }
 
-// Pagina Lista Movimenti & Filtri
-.transactions-container {
-  padding: 1rem 0;
+// Bottoni ricerca (Primary & Secondary)
+.btn-primary {
+  padding: 0.7rem 1.4rem;
+  background: $accent-orange;
+  color: $text-white;
+  border: none;
+  border-radius: $radius-md;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: $transition;
 
-  .filters-card {
-    background: $bg-card;
-    border-radius: $radius-lg;
-    padding: 1.5rem;
-    border: 1px solid $border-color;
-    margin-bottom: 1.5rem;
+  &:hover:not(:disabled) {
+    background: $accent-orange-hover;
+  }
 
-    .filters-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
 
-    .filters-actions {
-      display: flex;
-      justify-content: flex-end;
+.btn-secondary {
+  padding: 0.6rem 1.2rem;
+  background: $success-bg;
+  color: $accent-green;
+  border: 1px solid rgba($accent-green, 0.4);
+  border-radius: $radius-md;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: $transition;
+
+  &:hover:not(:disabled) {
+    background: rgba($accent-green, 0.25);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Toolbar & Messaggi
+.ricerca-error {
+  color: $error-color;
+  padding: 0.75rem 1rem;
+  background: $error-bg;
+  border-radius: $radius-md;
+  margin-bottom: 1.5rem;
+}
+
+.ricerca-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: $text-muted;
+  font-size: 0.9rem;
+}
+
+.ricerca-empty {
+  color: $text-muted;
+  padding: 0.5rem 0;
+}
+
+// Tabella risultati ricerca
+.ricerca-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+
+  th {
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: $text-muted;
+    border-bottom: 1px solid $border-color;
+
+    &.right {
+      text-align: right;
     }
   }
 
-  .table-card {
-    background: $bg-card;
-    border-radius: $radius-lg;
-    border: 1px solid $border-color;
-    overflow: hidden;
+  td {
+    padding: 0.85rem 1rem;
+    font-size: 0.9rem;
+    color: $text-main;
+    border-bottom: 1px solid $bg-card-hover;
 
-    .transactions-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-
-      th {
-        background: $bg-card-hover;
-        color: $text-muted;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid $border-color;
-      }
-
-      td {
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid $border-color;
-        font-size: 0.9rem;
-        color: $text-white;
-      }
-
-      tbody tr:hover {
-        background: rgba(255, 255, 255, 0.02);
-      }
-
-      .amount-income {
-        color: $accent-green;
-        font-weight: 700;
-      }
-
-      .amount-outcome {
-        color: $error-color;
-        font-weight: 700;
-      }
+    &.right {
+      text-align: right;
     }
   }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+// Badge Categoria & Sidebar Section
+.category-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background: $bg-card-hover;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: $text-dark-label;
+}
+
+.sidebar-section {
+  margin: 1rem 0 0.25rem 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $text-muted;
 }
