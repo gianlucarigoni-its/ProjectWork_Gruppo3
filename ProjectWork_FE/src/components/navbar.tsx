@@ -1,53 +1,22 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import NavUser from '../nav-user/nav-user';
+import NavUser from './nav-user';
 import './navbar.css';
 
 interface NavbarProps {
   userName?: string;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ userName }) => {
+export const Navbar: React.FC<NavbarProps> = ({ userName = 'Daniel Crudu' }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   return (
-    <nav className="navbar mb-4">
-      <div className="d-flex align-items-center gap-4">
-        {/* Menu di Navigazione */}
-        <ul className="navbar-nav">
-          <li className="nav-item">
-            <NavLink 
-              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} 
-              to="/home"
-            >
-              Home
-            </NavLink>
-          </li>
-
-          {isAuthenticated && (
-            <>
-              <li className="nav-item">
-                <NavLink 
-                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} 
-                  to="/ricarica"
-                >
-                  Ricarica
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                  <NavLink 
-                    className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} 
-                    to="/transactions"
-                  >
-                    Movimenti
-                  </NavLink>
-                </li>
-            </>
-          )}
-        </ul>
+    <nav className="navbar">
+      <div className="navbar-left">
+        {/* Voci di navigazione rimosse come richiesto */}
+        <ul className="navbar-nav"></ul>
       </div>
 
-      {/* Icona di Login / Utente */}
       <div className="navbar-right">
         {isAuthenticated ? (
           <NavUser userName={userName} onLogout={() => setIsAuthenticated(false)} />

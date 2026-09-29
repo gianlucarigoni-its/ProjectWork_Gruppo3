@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from './context/authContext';
 import RegisterPage from './pages/home/RegisterPage';
@@ -8,25 +8,24 @@ import MovimentoDettaglioPage from './pages/home/MovimentoDettaglioPage';
 import ConfermaPage from './pages/home/ConfermaPage';
 import RicercaMovimentiPage from './pages/home/RicercaMovimentiPage';
 import ModificaPasswordPage from './pages/home/ModificaPasswordPage';
-import RicaricaPage from './pages/home/Ricarica.Page' //Aggiungi/verifica il percorso del file RicaricaPage
+import RicaricaPage from './pages/home/Ricarica.Page';
 import { TransactionsList } from './components/Transaction.List';
 import ProfilePage from './pages/home/ProfilePage';
 import BonificoPage from './pages/home/BonificoPage';
+import MainLayout from './components/mainLayout';
 
-function ProtectedRoute({ children }: { children: ReactNode }) {
+function ProtectedRoute({ children }: { children?: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading) return <div>Caricamento...</div>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  return <>{children}</>;
+  return children ? <>{children}</> : <Outlet />;
 }
 
 function App() {
   const { currentUser, token } = useAuth() as any;
 
   const accountId = currentUser?.accountId || localStorage.getItem("accountId") || "";
-
-  const authToken =
-    token || localStorage.getItem("token") || localStorage.getItem("jwt") || undefined;
+  const authToken = token || localStorage.getItem("token") || localStorage.getItem("jwt") || undefined;
 
   return (
     <Routes>
@@ -35,63 +34,20 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/conferma/:token" element={<ConfermaPage />} />
 
-      {/* Rotte Protette */}
-      <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-      <Route path="/ricarica" element={<ProtectedRoute><RicaricaPage /></ProtectedRoute>} />
-      <Route path="/movimento/:id" element={<ProtectedRoute><MovimentoDettaglioPage /></ProtectedRoute>} />
-      <Route path="/ricerca/:tipo" element={<ProtectedRoute><RicercaMovimentiPage /></ProtectedRoute>} />
-      <Route path="/movimenti" element={<ProtectedRoute><RicercaMovimentiPage /></ProtectedRoute>} />
-      <Route path="/modifica-password" element={<ProtectedRoute><ModificaPasswordPage /></ProtectedRoute>} />
-      
-      {/* Rotta Movimenti / Transactions */}
-      <Route 
-        path="/transactions" 
-        element={
-          <ProtectedRoute>
-            <HomePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profilo"
-        element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/movimento/:id"
-        element={
-          <ProtectedRoute>
-            <MovimentoDettaglioPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/ricerca/:tipo"
-        element={
-          <ProtectedRoute>
-            <RicercaMovimentiPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/movimenti"
-        element={
-          <ProtectedRoute>
-            <RicercaMovimentiPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/modifica-password"
-        element={
-          <ProtectedRoute>
-            <ModificaPasswordPage />
-          </ProtectedRoute>
-        }
-      />
+      {/* Rotte Protette avvolte dal MainLayout condiviso con Sidebar */}
+      <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/ricarica" element={<RicaricaPage />} />
+        <Route path="/movimenti" element={<RicercaMovimentiPage />} />
+        <Route path="/movimento/:id" element={<MovimentoDettaglioPage />} />
+        <Route path="/ricerca/:tipo" element={<RicercaMovimentiPage />} />
+        <Route path="/modifica-password" element={<ModificaPasswordPage />} />
+        <Route path="/profilo" element={<ProfilePage />} />
+        <Route 
+          path="/transactions" 
+          element={<TransactionsList accountId={accountId} authToken={authToken} />} 
+        />
+      </Route>
 
       {/* Rotta Movimenti / Transactions */}
       <Route

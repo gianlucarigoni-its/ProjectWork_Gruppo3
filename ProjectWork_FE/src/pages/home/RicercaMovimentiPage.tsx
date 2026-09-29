@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Home, Wallet, ArrowLeftRight, Send, Settings } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import { api } from '../../utils/services/api';
 import { TransactionCategory } from '../../types/transaction';
 import type {
@@ -133,163 +132,130 @@ export default function RicercaMovimentiPage() {
   };
 
   return (
-    <div className="dashboard-container">
-      <aside className="sidebar">
-        <div className="sidebar-logo">
-          <img src="/img/3Vision_DigitalBank_LogoRMBG_white.png" alt="3Vision Logo" />
-        </div>
+    <div className="dashboard-body">
+      <div className="welcome-header">
+        <h1>Movimenti</h1>
+        <p>Cerca i movimenti del tuo conto ed esportali in CSV</p>
+      </div>
 
-        <nav className="sidebar-nav">
-          <Link to="/home" className="nav-item">
-            <Home size={20} />
-            <span>Home</span>
-          </Link>
-          <Link to="/ricarica" className="nav-item">
-            <Wallet size={20} />
-            <span>Ricarica</span>
-          </Link>
-          <Link to="/movimenti" className="nav-item active">
-            <ArrowLeftRight size={20} />
-            <span>Movimenti</span>
-          </Link>
-          <Link to="/bonifico" className="nav-item">
-            <Send size={20} />
-            <span>Bonifico</span>
-          </Link>
-          <Link to="/impostazioni" className="nav-item">
-            <Settings size={20} />
-            <span>Impostazioni</span>
-          </Link>
-        </nav>
-      </aside>
+      <div className="ricerca-tabs">
+        {SCHEDE.map((s) => (
+          <button
+            key={s.modo}
+            type="button"
+            className={`ricerca-tab ${modo === s.modo ? 'active' : ''}`}
+            onClick={() => setModo(s.modo)}
+          >
+            {s.titolo}
+          </button>
+        ))}
+      </div>
 
-      <main className="main-content">
-        <div className="dashboard-body">
-          <div className="welcome-header">
-            <h1>Movimenti</h1>
-            <p>Cerca i movimenti del tuo conto ed esportali in CSV</p>
-          </div>
+      <div className="ricerca-card">
+        <form onSubmit={handleSubmit} className="ricerca-form">
+          <label className="ricerca-field">
+            Numero di movimenti
+            <input
+              type="number"
+              min="1"
+              value={n}
+              onChange={(e) => setN(e.target.value)}
+            />
+          </label>
 
-          <div className="ricerca-tabs">
-            {SCHEDE.map((s) => (
-              <button
-                key={s.modo}
-                type="button"
-                className={`ricerca-tab ${modo === s.modo ? 'active' : ''}`}
-                onClick={() => setModo(s.modo)}
-              >
-                {s.titolo}
-              </button>
-            ))}
-          </div>
+          {modo === 2 && (
+            <label className="ricerca-field">
+              Categoria
+              <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+                <option value="">-- seleziona --</option>
+                {Object.values(TransactionCategory).map((c) => (
+                  <option key={c} value={c}>
+                    {ETICHETTE_CATEGORIE[c]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
-          <div className="ricerca-card">
-            <form onSubmit={handleSubmit} className="ricerca-form">
+          {modo === 3 && (
+            <>
               <label className="ricerca-field">
-                Numero di movimenti
-                <input
-                  type="number"
-                  min="1"
-                  value={n}
-                  onChange={(e) => setN(e.target.value)}
-                />
+                Dal
+                <input type="date" value={dal} onChange={(e) => setDal(e.target.value)} />
               </label>
+              <label className="ricerca-field">
+                Al
+                <input type="date" value={al} onChange={(e) => setAl(e.target.value)} />
+              </label>
+            </>
+          )}
 
-              {modo === 2 && (
-                <label className="ricerca-field">
-                  Categoria
-                  <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-                    <option value="">-- seleziona --</option>
-                    {Object.values(TransactionCategory).map((c) => (
-                      <option key={c} value={c}>
-                        {ETICHETTE_CATEGORIE[c]}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
+          <button type="submit" className="btn-primary" disabled={caricamento}>
+            {caricamento ? 'Ricerca in corso...' : 'Cerca'}
+          </button>
+        </form>
+      </div>
 
-              {modo === 3 && (
-                <>
-                  <label className="ricerca-field">
-                    Dal
-                    <input type="date" value={dal} onChange={(e) => setDal(e.target.value)} />
-                  </label>
-                  <label className="ricerca-field">
-                    Al
-                    <input type="date" value={al} onChange={(e) => setAl(e.target.value)} />
-                  </label>
-                </>
-              )}
+      {errore && <p className="ricerca-error">{errore}</p>}
 
-              <button type="submit" className="btn-primary" disabled={caricamento}>
-                {caricamento ? 'Ricerca in corso...' : 'Cerca'}
-              </button>
-            </form>
+      {saldo !== null && (
+        <div className="balance-card">
+          <div className="balance-header">
+            <span>Saldo finale del conto</span>
+          </div>
+          <div className="balance-amount">{formattaValuta(saldo)}</div>
+        </div>
+      )}
+
+      {movimenti && (
+        <div className="transactions-card">
+          <div className="ricerca-toolbar">
+            <span>{movimenti.length} movimenti trovati</span>
+            <button
+              type="button"
+              className="btn-secondary"
+              disabled={movimenti.length === 0 || esportando}
+              onClick={handleEsporta}
+            >
+              {esportando ? 'Esportazione...' : 'Esporta CSV'}
+            </button>
           </div>
 
-          {errore && <p className="ricerca-error">{errore}</p>}
-
-          {saldo !== null && (
-            <div className="balance-card">
-              <div className="balance-header">
-                <span>Saldo finale del conto</span>
-              </div>
-              <div className="balance-amount">{formattaValuta(saldo)}</div>
-            </div>
-          )}
-
-          {movimenti && (
-            <div className="transactions-card">
-              <div className="ricerca-toolbar">
-                <span>{movimenti.length} movimenti trovati</span>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  disabled={movimenti.length === 0 || esportando}
-                  onClick={handleEsporta}
-                >
-                  {esportando ? 'Esportazione...' : 'Esporta CSV'}
-                </button>
-              </div>
-
-              {movimenti.length === 0 ? (
-                <p className="ricerca-empty">Nessun movimento trovato.</p>
-              ) : (
-                <table className="ricerca-table">
-                  <thead>
-                    <tr>
-                      <th>Data</th>
-                      <th className="right">Importo</th>
-                      <th>Categoria</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {movimenti.map((m, i) => (
-                      <tr key={m.id ?? i}>
-                        <td>{new Date(m.date).toLocaleDateString('it-IT')}</td>
-                        <td
-                          className={`right tx-amount ${
-                            m.type === 'income' ? 'positivo' : 'negativo'
-                          }`}
-                        >
-                          {m.type === 'income' ? '+' : '-'}
-                          {formattaValuta(Math.abs(m.amount))}
-                        </td>
-                        <td>
-                          <span className="category-badge">
-                            {ETICHETTE_CATEGORIE[m.category] ?? m.category}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
+          {movimenti.length === 0 ? (
+            <p className="ricerca-empty">Nessun movimento trovato.</p>
+          ) : (
+            <table className="ricerca-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th className="right">Importo</th>
+                  <th>Categoria</th>
+                </tr>
+              </thead>
+              <tbody>
+                {movimenti.map((m, i) => (
+                  <tr key={m.id ?? i}>
+                    <td>{new Date(m.date).toLocaleDateString('it-IT')}</td>
+                    <td
+                      className={`right tx-amount ${
+                        m.type === 'income' ? 'positivo' : 'negativo'
+                      }`}
+                    >
+                      {m.type === 'income' ? '+' : '-'}
+                      {formattaValuta(Math.abs(m.amount))}
+                    </td>
+                    <td>
+                      <span className="category-badge">
+                        {ETICHETTE_CATEGORIE[m.category] ?? m.category}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
-      </main>
+      )}
     </div>
   );
 }
