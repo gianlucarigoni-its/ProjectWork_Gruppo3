@@ -144,7 +144,7 @@ export default function HomePage() {
             <Wallet size={20} />
             <span>Ricarica</span>
           </Link>
-          <Link to="/movimenti" className="nav-item">
+          <Link to="/ricerca/1" className="nav-item">
             <ArrowLeftRight size={20} />
             <span>Movimenti</span>
           </Link>
@@ -236,7 +236,7 @@ export default function HomePage() {
               <div className="transactions-card">
                 <div className="card-header">
                   <h3>Ultimi 5 movimenti</h3>
-                  <Link to="/movimenti" className="see-all-link">
+                  <Link to="/ricerca/1" className="see-all-link">
                     Vedi tutti <ChevronRight size={18} />
                   </Link>
                 </div>
@@ -285,7 +285,7 @@ export default function HomePage() {
                     <span>Ricarica</span>
                   </button>
 
-                  <button onClick={() => navigate('/movimenti')} className="action-btn">
+                  <button onClick={() => navigate('/ricerca/1')} className="action-btn">
                     <div className="action-icon dark">
                       <ArrowLeftRight size={22} />
                     </div>

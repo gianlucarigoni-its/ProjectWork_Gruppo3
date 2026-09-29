@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import {
+  Home,
+  Wallet,
+  ArrowLeftRight,
+  Tag,
+  CalendarRange,
+  Send,
+  Settings,
+} from 'lucide-react';
 import { api } from '../../utils/services/api';
 import { TransactionCategory } from '../../types/transaction';
 import type {
@@ -8,6 +17,8 @@ import type {
   TransactionFilterParams,
   TransactionResponse,
 } from '../../types/transaction';
+import './home.css';
+import './ricerca.css';
 
 const TITOLI: Record<number, string> = {
   1: 'Ultimi movimenti',
@@ -24,6 +35,9 @@ const ETICHETTE_CATEGORIE: Record<TransactionCategory, string> = {
   topUp: 'Ricarica telefonica',
   atmDeposit: 'Versamento ATM',
 };
+
+const formattaValuta = (valore: number) =>
+  new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(valore);
 
 export default function RicercaMovimentiPage() {
   const { tipo } = useParams<{ tipo: string }>();
@@ -48,14 +62,6 @@ export default function RicercaMovimentiPage() {
     setDal('');
     setAl('');
   }, [modo]);
-
-  if (![1, 2, 3].includes(modo)) {
-    return (
-      <div className="pagina errore">
-        Ricerca non valida. <Link to="/home">Torna alla Home</Link>
-      </div>
-    );
-  }
 
   const valida = (): string | null => {
     const nNum = Number(n);
@@ -133,103 +139,182 @@ export default function RicercaMovimentiPage() {
     }
   };
 
+  const sidebar = (
+    <aside className="sidebar">
+      <div className="sidebar-logo">
+        <img src="/img/3Vision_DigitalBank_LogoRMBG_white.png" alt="3Vision Logo" />
+      </div>
+
+      <nav className="sidebar-nav">
+        <Link to="/home" className="nav-item">
+          <Home size={20} />
+          <span>Home</span>
+        </Link>
+        <Link to="/ricarica" className="nav-item">
+          <Wallet size={20} />
+          <span>Ricarica</span>
+        </Link>
+
+        <div className="sidebar-section">Movimenti</div>
+        <Link to="/ricerca/1" className={`nav-item ${modo === 1 ? 'active' : ''}`}>
+          <ArrowLeftRight size={20} />
+          <span>Ultimi movimenti</span>
+        </Link>
+        <Link to="/ricerca/2" className={`nav-item ${modo === 2 ? 'active' : ''}`}>
+          <Tag size={20} />
+          <span>Per categoria</span>
+        </Link>
+        <Link to="/ricerca/3" className={`nav-item ${modo === 3 ? 'active' : ''}`}>
+          <CalendarRange size={20} />
+          <span>Tra due date</span>
+        </Link>
+
+        <div className="sidebar-section">Altro</div>
+        <Link to="/bonifico" className="nav-item">
+          <Send size={20} />
+          <span>Bonifico</span>
+        </Link>
+        <Link to="/impostazioni" className="nav-item">
+          <Settings size={20} />
+          <span>Impostazioni</span>
+        </Link>
+      </nav>
+    </aside>
+  );
+
+  if (![1, 2, 3].includes(modo)) {
+    return (
+      <div className="dashboard-container">
+        {sidebar}
+        <main className="main-content">
+          <div className="dashboard-body">
+            <p className="ricerca-error">
+              Ricerca non valida. <Link to="/home">Torna alla Home</Link>
+            </p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
-    <div className="pagina">
-      <Link to="/home">&larr; Torna alla Home</Link>
-      <h1>{TITOLI[modo]}</h1>
+    <div className="dashboard-container">
+      {sidebar}
 
-      <form onSubmit={handleSubmit} className="ricerca-form">
-        <label>
-          Numero di movimenti
-          <input
-            type="number"
-            min="1"
-            value={n}
-            onChange={(e) => setN(e.target.value)}
-          />
-        </label>
-
-        {modo === 2 && (
-          <label>
-            Categoria
-            <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-              <option value="">-- seleziona --</option>
-              {Object.values(TransactionCategory).map((c) => (
-                <option key={c} value={c}>
-                  {ETICHETTE_CATEGORIE[c]}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-
-        {modo === 3 && (
-          <>
-            <label>
-              Dal
-              <input type="date" value={dal} onChange={(e) => setDal(e.target.value)} />
-            </label>
-            <label>
-              Al
-              <input type="date" value={al} onChange={(e) => setAl(e.target.value)} />
-            </label>
-          </>
-        )}
-
-        <button type="submit" disabled={caricamento}>
-          {caricamento ? 'Ricerca in corso...' : 'Cerca'}
-        </button>
-      </form>
-
-      {errore && <p className="errore">{errore}</p>}
-
-      {saldo !== null && (
-        <div className="saldo-card">
-          <span>Saldo finale del conto</span>
-          <strong>{saldo.toFixed(2)} EUR</strong>
-        </div>
-      )}
-
-      {movimenti && (
-        <>
-          <div className="ricerca-azioni">
-            <span>{movimenti.length} movimenti trovati</span>
-            <button
-              type="button"
-              disabled={movimenti.length === 0 || esportando}
-              onClick={handleEsporta}
-            >
-              {esportando ? 'Esportazione...' : 'Esporta CSV'}
-            </button>
+      <main className="main-content">
+        <div className="dashboard-body">
+          <div className="welcome-header">
+            <h1>{TITOLI[modo]}</h1>
+            <p>Cerca i movimenti del tuo conto ed esportali in CSV</p>
           </div>
 
-          {movimenti.length === 0 ? (
-            <p>Nessun movimento trovato.</p>
-          ) : (
-            <table className="movimenti-table">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Importo</th>
-                  <th>Categoria</th>
-                </tr>
-              </thead>
-              <tbody>
-                {movimenti.map((m, i) => (
-                  <tr key={m.id ?? i}>
-                    <td>{new Date(m.date).toLocaleDateString('it-IT')}</td>
-                    <td className={m.type === 'income' ? 'importo-positivo' : 'importo-negativo'}>
-                      {m.type === 'income' ? '+' : '-'}
-                      {Math.abs(m.amount).toFixed(2)} EUR
-                    </td>
-                    <td>{ETICHETTE_CATEGORIE[m.category] ?? m.category}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="ricerca-card">
+            <form onSubmit={handleSubmit} className="ricerca-form">
+              <label className="ricerca-field">
+                Numero di movimenti
+                <input
+                  type="number"
+                  min="1"
+                  value={n}
+                  onChange={(e) => setN(e.target.value)}
+                />
+              </label>
+
+              {modo === 2 && (
+                <label className="ricerca-field">
+                  Categoria
+                  <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+                    <option value="">-- seleziona --</option>
+                    {Object.values(TransactionCategory).map((c) => (
+                      <option key={c} value={c}>
+                        {ETICHETTE_CATEGORIE[c]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              {modo === 3 && (
+                <>
+                  <label className="ricerca-field">
+                    Dal
+                    <input type="date" value={dal} onChange={(e) => setDal(e.target.value)} />
+                  </label>
+                  <label className="ricerca-field">
+                    Al
+                    <input type="date" value={al} onChange={(e) => setAl(e.target.value)} />
+                  </label>
+                </>
+              )}
+
+              <button type="submit" className="btn-primary" disabled={caricamento}>
+                {caricamento ? 'Ricerca in corso...' : 'Cerca'}
+              </button>
+            </form>
+          </div>
+
+          {errore && <p className="ricerca-error">{errore}</p>}
+
+          {saldo !== null && (
+            <div className="balance-card">
+              <div className="balance-header">
+                <span>Saldo finale del conto</span>
+              </div>
+              <div className="balance-amount">{formattaValuta(saldo)}</div>
+            </div>
           )}
-        </>
-      )}
+
+          {movimenti && (
+            <div className="transactions-card">
+              <div className="ricerca-toolbar">
+                <span>{movimenti.length} movimenti trovati</span>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  disabled={movimenti.length === 0 || esportando}
+                  onClick={handleEsporta}
+                >
+                  {esportando ? 'Esportazione...' : 'Esporta CSV'}
+                </button>
+              </div>
+
+              {movimenti.length === 0 ? (
+                <p className="ricerca-empty">Nessun movimento trovato.</p>
+              ) : (
+                <table className="ricerca-table">
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th className="right">Importo</th>
+                      <th>Categoria</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {movimenti.map((m, i) => (
+                      <tr key={m.id ?? i}>
+                        <td>{new Date(m.date).toLocaleDateString('it-IT')}</td>
+                        <td
+                          className={`right tx-amount ${
+                            m.type === 'income' ? 'positivo' : 'negativo'
+                          }`}
+                        >
+                          {m.type === 'income' ? '+' : '-'}
+                          {formattaValuta(Math.abs(m.amount))}
+                        </td>
+                        <td>
+                          <span className="category-badge">
+                            {ETICHETTE_CATEGORIE[m.category] ?? m.category}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
