@@ -9,7 +9,6 @@ import type {
   TransactionFilterParams,
   TransactionResponse,
 } from '../../types/transaction';
-import './ricerca.css';
 
 const SCHEDE: { modo: number; titolo: string }[] = [
   { modo: 1, titolo: 'Ultimi movimenti' },
