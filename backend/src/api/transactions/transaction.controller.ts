@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { TypedRequest } from "../../lib/typed-request.interface";
-import { DownloadDTO, Filter, TopUpDto, TransferDto } from "./transaction.dto";
+import { DownloadDTO, Filter, TopUpDto, TransferDto, TypeID } from "./transaction.dto";
 import transactionSrv from "./transaction.service";
 import { IsIBAN } from "class-validator";
 
@@ -13,7 +13,7 @@ export const find = async (req: TypedRequest<unknown, Filter>, res: Response, ne
   }
 };
 
-export const findById = async (req: TypedRequest, res: Response, next: NextFunction) => {
+export const findById = async (req: TypedRequest<unknown, unknown, TypeID>, res: Response, next: NextFunction) => {
   try {
     const transactionId = req.params.id;
     const accountId = req.account.id;

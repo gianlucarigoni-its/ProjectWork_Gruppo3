@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { IsDateString, IsEnum, IsInt, IsMongoId, IsNumber, IsOptional, IsString, Min } from "class-validator";
 import { Transaction, TransactionCategory } from "./transaction.entity";
 import { Type } from "class-transformer";
 
@@ -66,4 +66,10 @@ export class TopUpDto {
 export class TransactionResponse {
   transactions: Transaction[];
   balance?: number;
+}
+
+export class TypeID {
+  @IsString()
+  @IsMongoId()
+  id: string;
 }
