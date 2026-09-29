@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { TypedRequest } from "../../lib/typed-request.interface";
-import { Download, Filter, TopUpDto, TransferDto } from "./transaction.dto";
+import { DownloadDTO, Filter, TopUpDto, TransferDto } from "./transaction.dto";
 import transactionSrv from "./transaction.service";
 import { IsIBAN } from "class-validator";
 
@@ -13,7 +13,7 @@ export const find = async (req: TypedRequest<unknown, Filter>, res: Response, ne
   }
 };
 
-export const download = async (req: TypedRequest<unknown, Download>, res: Response, next: NextFunction) => {
+export const download = async (req: TypedRequest<unknown, DownloadDTO>, res: Response, next: NextFunction) => {
   try {
     const result = await transactionSrv.filter(req.query, req.params.accountId);
     const csv = transactionSrv.buildCsv(result.transactions, result.balance);

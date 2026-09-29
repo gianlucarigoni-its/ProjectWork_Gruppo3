@@ -22,7 +22,7 @@ export class Filter {
   to?: string;
 }
 
-export class Download {
+export class DownloadDTO {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
