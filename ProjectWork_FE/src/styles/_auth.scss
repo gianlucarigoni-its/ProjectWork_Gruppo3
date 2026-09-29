@@ -1,4 +1,4 @@
-@use 'variables' as *;
+@use "variables" as *;
 
 .auth-page {
   min-height: 100vh;
@@ -64,6 +64,38 @@
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+    }
+
+    /* Pulsante d'azione integrato */
+    .auth-btn {
+      margin-top: 0.5rem;
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .auth-btn:hover {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .auth-btn:active {
+      transform: translateY(0);
+    }
+
+    .auth-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .auth-footer-text {
