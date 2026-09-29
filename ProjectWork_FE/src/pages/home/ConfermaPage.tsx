@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../../utils/services/api";
 
 import logoImg from '../../../public/img/3Vision_DigitalBank_LogoRMBG_white.png';
-import '../../styles/login.css';
+
 
 interface VerifyResponse {
   success: boolean;
