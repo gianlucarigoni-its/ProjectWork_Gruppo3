@@ -13,6 +13,34 @@ export const find = async (req: TypedRequest<unknown, Filter>, res: Response, ne
   }
 };
 
+export const findById = async (req: TypedRequest, res: Response, next: NextFunction) => {
+  try {
+    const transactionId = req.params.id;
+    const accountId = req.account.id;
+
+    const result = await transactionSrv.getById(transactionId, accountId);
+
+    if (!result.success) {
+      res.status(result.statusCode).json({
+        error: result.error,
+        message: result.message,
+      });
+      return;
+    }
+    res.status(200).json({
+      id: result.data?._id,
+      accountId: result.data?.accountId,
+      amount: result.data?.amount,
+      description: result.data?.description,
+      category: result.data?.category,
+      type: result.data?.type,
+      date: result.data?.date,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const download = async (req: TypedRequest<unknown, DownloadDTO>, res: Response, next: NextFunction) => {
   try {
     const result = await transactionSrv.filter(req.query, req.account.id);

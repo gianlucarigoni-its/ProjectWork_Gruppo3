@@ -34,6 +34,31 @@ export class TransactionService {
     return { transactions };
   }
 
+  async getById(transactionId: string, accountId: string) {
+    const transaction = await TransactionModel.findById(transactionId).exec();
+    if (!transaction) {
+      return {
+        success: false,
+        statusCode: 404,
+        error: "TRANSACTION_NOT_FOUND",
+        message: "Movimento non trovato",
+      };
+    }
+    if (transaction.accountId.toString() !== accountId) {
+      return {
+        success: false,
+        statusCode: 403,
+        error: "FORBIDDEN",
+        message: "Il movimento non appartiene al conto corrente dell'utente autenticato",
+      };
+    }
+    return {
+      success: true,
+      statusCode: 200,
+      data: transaction,
+    };
+  }
+
   buildCsv(transactions: Transaction[], balance?: number): string {
     const escape = (val: string) => `"${val.replace(/"/g, '""')}"`;
 
