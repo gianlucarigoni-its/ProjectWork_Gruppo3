@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, IsInt, IsMongoId, IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { IsPositive, IsDateString, IsEnum, IsInt, IsMongoId, IsNumber, IsOptional, IsString, Min } from "class-validator";
 import { Transaction, TransactionCategory } from "./transaction.entity";
 import { Type } from "class-transformer";
 
@@ -47,7 +47,8 @@ export class TransferDto {
   IBAN: string;
 
   @Type(() => Number)
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2, allowNaN: false, allowInfinity: false })
+  @IsPositive()
   amount: number;
 }
 
@@ -59,7 +60,8 @@ export class TopUpDto {
   operator: string;
 
   @Type(() => Number)
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2, allowNaN: false, allowInfinity: false })
+  @IsPositive()
   amount: number;
 }
 

@@ -5,6 +5,7 @@ export const TransactionCategory = {
   CashWithdrawal: "cashWithdrawal",
   UtilityPayment: "utilityPayment",
   TopUp: "topUp",
+  AtmDeposit: "atmDeposit",
 } as const;
 
 export type TransactionCategory = (typeof TransactionCategory)[keyof typeof TransactionCategory];

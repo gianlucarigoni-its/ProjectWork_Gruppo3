@@ -95,6 +95,18 @@ export class TransactionService {
   }
 
   async executeTransfer(senderId: string, clientIp: string, IBAN: string, amount: number) {
+    IBAN = IBAN.replace(/\s/g, "").toUpperCase();
+    if (!Number.isFinite(amount) || amount <= 0) {
+      await TransactionLogModel.create({
+        transactionId: null,
+        operationType: "BONIFICO",
+        ipAddress: clientIp,
+        status: "FAILED",
+        failureReason: "Importo non valido",
+      });
+      return { success: false, statusCode: 400, message: "Importo non valido." };
+    }
+
     const session = await TransactionModel.startSession();
     session.startTransaction();
     try {
@@ -227,6 +239,17 @@ export class TransactionService {
       };
     } catch (err) {
       await session.abortTransaction();
+      try {
+        await TransactionLogModel.create({
+          transactionId: null,
+          operationType: "BONIFICO",
+          ipAddress: clientIp,
+          status: "FAILED",
+          failureReason: "Errore interno",
+        });
+      } catch (logErr) {
+        console.error("Errore scrittura registro:", logErr);
+      }
       throw err;
     } finally {
       session.endSession();

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Home, Wallet, ArrowLeftRight, Send, Settings, CheckCircle2, AlertCircle, Smartphone } from 'lucide-react';

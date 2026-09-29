@@ -11,6 +11,7 @@ import ModificaPasswordPage from './pages/home/ModificaPasswordPage';
 import RicaricaPage from './pages/home/Ricarica.Page' //Aggiungi/verifica il percorso del file RicaricaPage
 import { TransactionsList } from './components/Transaction.List';
 import ProfilePage from './pages/home/ProfilePage';
+import BonificoPage from './pages/home/BonificoPage';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -103,6 +104,7 @@ function App() {
       />
 
       {/* Catch-all: Redireziona a /home se l'utente è loggato, altrimenti a /login */}
+      <Route path="/bonifico" element={<ProtectedRoute><BonificoPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

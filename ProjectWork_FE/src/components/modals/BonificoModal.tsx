@@ -1,3 +1,4 @@
+import { api } from '../../utils/services/api';
 import React, { useState } from 'react';
 
 interface BonificoModalProps {
@@ -6,6 +7,74 @@ interface BonificoModalProps {
   onSuccess?: () => void; // Callback
 }
 
+// Valori presi da styles/_variables.scss
+const css = `
+.bonifico-overlay {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+  background: rgba(13, 17, 23, 0.8);
+  backdrop-filter: blur(4px);
+}
+.bonifico-card {
+  width: 100%; max-width: 440px; box-sizing: border-box;
+  padding: 1.75rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  color: #f3f4f6;
+  font-family: inherit;
+}
+.bonifico-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.bonifico-title { margin: 0; font-size: 1.25rem; font-weight: 700; color: #ffffff; }
+.bonifico-close {
+  background: transparent; border: none; cursor: pointer;
+  color: #9ca3af; font-size: 1.1rem; line-height: 1;
+  padding: 0.25rem; border-radius: 6px;
+  transition: all 0.2s ease;
+}
+.bonifico-close:hover { color: #ffffff; background: #21262d; }
+.bonifico-error {
+  margin-bottom: 1rem; padding: 0.75rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  border-radius: 6px;
+  color: #f87171; font-size: 0.9rem;
+}
+.bonifico-form { display: flex; flex-direction: column; gap: 1.1rem; }
+.bonifico-label {
+  display: block; margin-bottom: 0.4rem;
+  font-size: 0.85rem; font-weight: 500; color: #d1d5db;
+}
+.bonifico-input {
+  width: 100%; box-sizing: border-box;
+  padding: 0.75rem;
+  background: #21262d;
+  border: 1px solid #363b42;
+  border-radius: 10px;
+  color: #ffffff; font-size: 0.95rem; font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.bonifico-input::placeholder { color: #9ca3af; }
+.bonifico-input:focus { border-color: #10b981; }
+.bonifico-iban { font-family: monospace; text-transform: uppercase; }
+.bonifico-submit {
+  width: 100%; padding: 0.85rem;
+  background: #10b981; color: #ffffff;
+  border: none; border-radius: 10px;
+  font-size: 0.95rem; font-weight: 600; font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.bonifico-submit:hover:not(:disabled) { background: #059669; transform: translateY(-2px); }
+.bonifico-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+`;
+
 export const BonificoModal: React.FC<BonificoModalProps> = ({
   isOpen,
   onClose,
@@ -13,7 +82,6 @@ export const BonificoModal: React.FC<BonificoModalProps> = ({
 }) => {
   const [recipientIBAN, setRecipientIBAN] = useState('');
   const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,79 +93,54 @@ export const BonificoModal: React.FC<BonificoModalProps> = ({
     setError(null);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/operations/transfer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          recipientIBAN: recipientIBAN.toUpperCase().trim(),
-          amount: Number(amount),
-          description: description.trim() || undefined,
-        }),
+      await api.post('/transactions/transfer', {
+        IBAN: recipientIBAN.replace(/\s/g, '').toUpperCase(),
+        amount: Number(amount),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Errore durante l'invio del bonifico");
-      }
-
       alert('Bonifico eseguito con successo!');
-      
+
       // Reset
       setRecipientIBAN('');
       setAmount('');
-      setDescription('');
-      
+
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        {/* Header Modale */}
-        <div className="flex items-center justify-between border-b pb-3">
-          <h3 className="text-xl font-bold text-gray-800">Nuovo Bonifico</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 font-bold text-lg"
-          >
+    <div className="bonifico-overlay">
+      <style>{css}</style>
+      <div className="bonifico-card">
+        <div className="bonifico-header">
+          <h3 className="bonifico-title">Nuovo Bonifico</h3>
+          <button type="button" onClick={onClose} className="bonifico-close" aria-label="Chiudi">
             ✕
           </button>
         </div>
 
-        {/* Banner Errore */}
-        {error && (
-          <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-200">
-            {error}
-          </div>
-        )}
+        {error && <div className="bonifico-error">{error}</div>}
 
-        {/* Form Bonifico */}
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        <form onSubmit={handleSubmit} className="bonifico-form">
           <div>
-            <label className="block text-sm font-medium text-gray-700">IBAN Destinatario</label>
+            <label className="bonifico-label">IBAN Destinatario</label>
             <input
               type="text"
               required
               placeholder="IT60X0542811101000000654321"
               value={recipientIBAN}
               onChange={(e) => setRecipientIBAN(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 font-mono uppercase focus:border-emerald-500 focus:outline-none"
+              className="bonifico-input bonifico-iban"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Importo (€)</label>
+            <label className="bonifico-label">Importo (€)</label>
             <input
               type="number"
               step="0.01"
@@ -106,26 +149,11 @@ export const BonificoModal: React.FC<BonificoModalProps> = ({
               placeholder="0.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 focus:border-emerald-500 focus:outline-none"
+              className="bonifico-input"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Causale (Opzionale)</label>
-            <textarea
-              rows={2}
-              placeholder="Es. Quota cena"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 focus:border-emerald-500 focus:outline-none"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-emerald-600 py-3 font-semibold text-white transition-all hover:bg-emerald-700 disabled:opacity-50"
-          >
+          <button type="submit" disabled={loading} className="bonifico-submit">
             {loading ? 'Elaborazione...' : 'Conferma Bonifico'}
           </button>
         </form>
