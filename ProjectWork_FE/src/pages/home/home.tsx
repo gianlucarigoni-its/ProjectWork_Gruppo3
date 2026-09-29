@@ -38,64 +38,43 @@ export default function HomePage() {
   const [errore, setErrore] = useState<string | null>(null);
 
   useEffect(() => {
-    const caricaDatiDashboard = async () => {
-      setCaricamento(true);
-      setErrore(null);
+  const caricaDatiDashboard = async () => {
+    setCaricamento(true);
+    setErrore(null);
 
-      const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
 
-      if (!token) {
-        navigate('/login');
-        return;
-      }
+    if (!token) {
+      navigate('/login');
+      return;
+    }
 
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
 
-      // 1. Recupero Dettagli Conto e Profilo
-      try {
-        const resConto = await axios.get('http://localhost:3000/api/conto/dettagli', config);
-        
-        console.log("RISPOSTA SERVER CONTO:", resConto.data);
+    try {
+      // 1. Recupero Dettagli Conto e Profilo (che contengono già le transazioni)
+      const resConto = await axios.get('http://localhost:3000/api/conto/dettagli', config);
+      
+      console.log("RISPOSTA SERVER CONTO:", resConto.data);
 
-        if (resConto.data) {
-          // Estrae i dati gestendo eventuali strutture nidificate (resConto.data.account, resConto.data.user o resConto.data)
-          const data = resConto.data.account || resConto.data.user || resConto.data;
+      if (resConto.data) {
+        const dataAccount = resConto.data.account || resConto.data.user || resConto.data;
 
-          const nome = data.firstName || data.nome || data.username || '';
-          const cognome = data.lastName || data.cognome || '';
-          const saldo = data.balance ?? data.saldo ?? data.saldoDisponibile ?? 0;
+        const nome = dataAccount.firstName || dataAccount.nome || dataAccount.username || '';
+        const cognome = dataAccount.lastName || dataAccount.cognome || '';
+        const saldo = dataAccount.balance ?? dataAccount.saldo ?? dataAccount.saldoDisponibile ?? 0;
 
-          setNomeTitolare(nome);
-          setCognomeTitolare(cognome);
-          setSaldoValore(Number(saldo));
-        }
-      } catch (err: any) {
-        console.error('Errore recupero dettagli conto:', err);
-        if (err.response?.status === 401) {
-          localStorage.clear();
-          navigate('/login');
-          return;
-        }
-        if (!err.response || err.response.status >= 500) {
-          setErrore('Impossibile connettersi al server per recuperare i dati.');
-        }
-      }
+        setNomeTitolare(nome);
+        setCognomeTitolare(cognome);
+        setSaldoValore(Number(saldo));
 
-      // 2. Recupero Movimenti Recenti
-      try {
-        const resMovimenti = await axios.get('http://localhost:3000/api/movimenti/recenti', config);
-        console.log("RISPOSTA SERVER MOVIMENTI:", resMovimenti.data);
+        // Estrae le transazioni già restituite da resConto.data
+        const listaMovimenti = resConto.data.transactions || dataAccount.transactions || [];
 
-        // Estrae l'array se risiede dentro un campo dell'oggetto (es. resMovimenti.data.data) o se è già un array
-        const listaMovimenti = Array.isArray(resMovimenti.data)
-          ? resMovimenti.data
-          : (resMovimenti.data.data || resMovimenti.data.transactions || resMovimenti.data.movimenti || []);
-
-        // Normalizza le proprietà del movimento in caso abbiano nomi diversi dal DB
         const movimentiFormattati = listaMovimenti.map((m: any) => ({
           id: m.id || m._id,
           descrizione: m.descrizione || m.description || m.type || 'Movimento',
@@ -105,15 +84,24 @@ export default function HomePage() {
         }));
 
         setMovimentiRecenti(movimentiFormattati);
-      } catch (err: any) {
-        console.error('Errore recupero movimenti:', err);
-        setMovimentiRecenti([]);
-      } finally {
-        setCaricamento(false);
-      }};
+      }
+    } catch (err: any) {
+      console.error('Errore recupero dettagli conto:', err);
+      if (err.response?.status === 401) {
+        localStorage.clear();
+        navigate('/login');
+        return;
+      }
+      if (!err.response || err.response.status >= 500) {
+        setErrore('Impossibile connettersi al server per recuperare i dati.');
+      }
+    } finally {
+      setCaricamento(false);
+    }
+  };
 
-    caricaDatiDashboard();
-  }, [navigate]);
+  caricaDatiDashboard();
+}, [navigate]);
 
   const handleLogout = () => {
     localStorage.clear();

@@ -17,8 +17,7 @@ import type {
   TransactionFilterParams,
   TransactionResponse,
 } from '../../types/transaction';
-import './home.css';
-import './ricerca.css';
+
 
 const TITOLI: Record<number, string> = {
   1: 'Ultimi movimenti',
