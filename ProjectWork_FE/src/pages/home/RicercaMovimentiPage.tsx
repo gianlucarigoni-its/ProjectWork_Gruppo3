@@ -24,7 +24,6 @@ const ETICHETTE_CATEGORIE: Record<TransactionCategory, string> = {
   cashWithdrawal: 'Prelievo contanti',
   utilityPayment: 'Pagamento utenze',
   topUp: 'Ricarica telefonica',
-  atmDeposit: 'Versamento ATM',
 };
 
 const formattaValuta = (valore: number) =>
