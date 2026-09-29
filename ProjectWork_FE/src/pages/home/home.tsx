@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Profiler } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api } from "../../utils/services/api";
 import {
@@ -11,6 +11,7 @@ import {
   Eye,
   EyeOff,
   ChevronRight,
+  User,
 } from "lucide-react";
 import logoImg from "../../../public/img/3Vision_DigitalBank_LogoRMBG_white.png";
 
@@ -170,19 +171,21 @@ export default function HomePage() {
               {menuProfiloAperto && (
                 <div className="profile-dropdown">
                   <div className="dropdown-user-info">
-                    <Link
-                      to="/profilo"
-                      className="user-name"
-                      onClick={() => setMenuProfiloAperto(false)}
-                    >
+                    <p>
                       {nomeTitolare} {cognomeTitolare}
-                    </Link>
+                    </p>
                   </div>
                   <hr />
-                  <button onClick={() => navigate("/impostazioni")} className="dropdown-item">
-                    <Settings size={16} />
-                    <span>Impostazioni</span>
-                  </button>
+
+                  <Link
+                    to="/profilo"
+                    className="dropdown-item"
+                    onClick={() => setMenuProfiloAperto(false)}
+                  >
+                    <User size={16} />
+                    <span>Profilo</span>
+                  </Link>
+
                   <button onClick={handleLogout} className="dropdown-item logout">
                     <LogOut size={16} />
                     <span>Logout</span>

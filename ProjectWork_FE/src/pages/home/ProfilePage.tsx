@@ -21,7 +21,7 @@ export interface ProfileResponse {
   firstName: string;
   lastName: string;
   IBAN: string;
-  amount: number;
+  balance: number;
   createdAt: string;
 }
 
@@ -91,7 +91,7 @@ export default function ProfilePage() {
         </div>
 
         <nav className="sidebar-nav">
-          <Link to="/home" className="nav-item">
+          <Link to="/home" className="nav-item active">
             <Home size={20} />
             <span>Home</span>
           </Link>
@@ -114,8 +114,8 @@ export default function ProfilePage() {
         </nav>
       </aside>
 
+      {/* Area Principale */}
       <main className="main-content">
-        {/* Navbar Superiore */}
         {/* Navbar Superiore */}
         <header className="top-navbar">
           <div className="navbar-right">
@@ -125,27 +125,29 @@ export default function ProfilePage() {
                 onClick={() => setMenuProfiloAperto(!menuProfiloAperto)}
               >
                 <div className="avatar">
-                  {nomeTitolare ? nomeTitolare[0].toUpperCase() : "U"}
-                  {cognomeTitolare ? cognomeTitolare[0].toUpperCase() : ""}
+                  {nomeTitolare[0]}
+                  {cognomeTitolare[0]}
                 </div>
               </button>
 
               {menuProfiloAperto && (
                 <div className="profile-dropdown">
                   <div className="dropdown-user-info">
-                    <Link
-                      to="/profilo"
-                      className="user-name"
-                      onClick={() => setMenuProfiloAperto(false)}
-                    >
+                    <p>
                       {nomeTitolare} {cognomeTitolare}
-                    </Link>
+                    </p>
                   </div>
                   <hr />
-                  <button onClick={() => navigate("/impostazioni")} className="dropdown-item">
-                    <Settings size={16} />
-                    <span>Impostazioni</span>
-                  </button>
+
+                  <Link
+                    to="/profilo"
+                    className="dropdown-item"
+                    onClick={() => setMenuProfiloAperto(false)}
+                  >
+                    <User size={16} />
+                    <span>Profilo</span>
+                  </Link>
+
                   <button onClick={handleLogout} className="dropdown-item logout">
                     <LogOut size={16} />
                     <span>Logout</span>
@@ -157,54 +159,68 @@ export default function ProfilePage() {
         </header>
 
         {/* Contenuto Pagina Profilo */}
-        <div className="profile-content">
-          <h1 className="page-title">Il mio Profilo</h1>
+        <div className="dashboard-body">
+          <div className="welcome-header">
+            <h1>Il mio Profilo</h1>
+          </div>
 
-          {loading && <p className="loading-text">Caricamento in corso...</p>}
+          {loading && <p className="ricerca-empty">Caricamento in corso...</p>}
           {error && <p className="ricerca-error">{error}</p>}
 
           {!loading && !error && profilo && (
-            <div className="profile-grid">
+            <div className="dashboard-grid">
               {/* Dati Personali */}
-              <div className="profile-card">
+              <div className="transactions-card">
                 <div className="card-header">
-                  <User size={20} />
-                  <h2>Informazioni Utente</h2>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <User size={20} />
+                    <h3>Informazioni Utente</h3>
+                  </div>
                 </div>
-                <div className="card-body">
-                  <div className="info-row">
-                    <span className="label">Nome:</span>
-                    <span className="value">{profilo.firstName}</span>
+                <div className="transactions-list">
+                  <div className="transaction-item">
+                    <span className="tx-date">Nome</span>
+                    <span className="tx-title">{profilo.firstName}</span>
                   </div>
-                  <div className="info-row">
-                    <span className="label">Cognome:</span>
-                    <span className="value">{profilo.lastName}</span>
+                  <div className="transaction-item">
+                    <span className="tx-date">Cognome</span>
+                    <span className="tx-title">{profilo.lastName}</span>
                   </div>
-                  <div className="info-row">
-                    <span className="label">Username:</span>
-                    <span className="value">{profilo.username}</span>
+                  <div className="transaction-item">
+                    <span className="tx-date">Username</span>
+                    <span className="tx-title">{profilo.username}</span>
                   </div>
                 </div>
               </div>
 
               {/* Dettagli Conto */}
-              <div className="profile-card">
+              <div className="transactions-card">
                 <div className="card-header">
-                  <CreditCard size={20} />
-                  <h2>Dettagli Conto</h2>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <CreditCard size={20} />
+                    <h3>Dettagli Conto</h3>
+                  </div>
                 </div>
-                <div className="card-body">
-                  <div className="info-row">
-                    <span className="label">IBAN:</span>
-                    <span className="value">{profilo.IBAN}</span>
+                <div className="transactions-list">
+                  <div className="transaction-item">
+                    <span className="tx-date">IBAN</span>
+                    <span className="tx-title">{profilo.IBAN}</span>
                   </div>
-                  <div className="info-row">
-                    <span className="label">Saldo Disponibile:</span>
-                    <span className="value highlight-amount">{formatSaldo(profilo.amount)}</span>
+                  <div className="transaction-item">
+                    <span className="tx-date">Saldo Disponibile</span>
+                    <span className="tx-amount positivo">{formatSaldo(profilo.balance)}</span>
                   </div>
-                  <div className="info-row">
-                    <span className="label">Stato Conto:</span>
-                    <span className="value badge-active">
+                  <div className="transaction-item">
+                    <span className="tx-date">Stato Conto</span>
+                    <span
+                      className="tx-amount positivo"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.3rem",
+                        fontSize: "0.85rem",
+                      }}
+                    >
                       <ShieldCheck size={14} /> Attivo
                     </span>
                   </div>
@@ -212,19 +228,23 @@ export default function ProfilePage() {
               </div>
 
               {/* Info Account */}
-              <div className="profile-card">
+              <div className="transactions-card">
                 <div className="card-header">
-                  <Hash size={20} />
-                  <h2>Dettagli Registrazione</h2>
-                </div>
-                <div className="card-body">
-                  <div className="info-row">
-                    <span className="label">ID Account:</span>
-                    <span className="value code-text">{profilo.id}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <Hash size={20} />
+                    <h3>Dettagli Registrazione</h3>
                   </div>
-                  <div className="info-row">
-                    <span className="label">Data Apertura:</span>
-                    <span className="value">{formatData(profilo.createdAt)}</span>
+                </div>
+                <div className="transactions-list">
+                  <div className="transaction-item">
+                    <span className="tx-date">ID Account</span>
+                    <span className="tx-title" style={{ fontFamily: "monospace" }}>
+                      {profilo.id}
+                    </span>
+                  </div>
+                  <div className="transaction-item">
+                    <span className="tx-date">Data Apertura</span>
+                    <span className="tx-title">{formatData(profilo.createdAt)}</span>
                   </div>
                 </div>
               </div>
