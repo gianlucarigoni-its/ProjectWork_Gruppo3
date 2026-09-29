@@ -1,15 +1,16 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import type { ReactNode } from "react";
-import { useAuth } from "./context/authContext";
-import RegisterPage from "./pages/home/RegisterPage";
-import LoginPage from "./components/pages/loginPage";
-import HomePage from "./pages/home/home";
-import MovimentoDettaglioPage from "./pages/home/MovimentoDettaglioPage";
-import ConfermaPage from "./pages/home/ConfermaPage";
-import RicercaMovimentiPage from "./pages/home/RicercaMovimentiPage";
-import ModificaPasswordPage from "./pages/home/ModificaPasswordPage";
-import ProfilePage from "./pages/home/ProfilePage";
-import { TransactionsList } from "./components/Transaction.List";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { useAuth } from './context/authContext';
+import RegisterPage from './pages/home/RegisterPage';
+import LoginPage from './components/pages/loginPage';
+import HomePage from './pages/home/home';
+import MovimentoDettaglioPage from './pages/home/MovimentoDettaglioPage';
+import ConfermaPage from './pages/home/ConfermaPage';
+import RicercaMovimentiPage from './pages/home/RicercaMovimentiPage';
+import ModificaPasswordPage from './pages/home/ModificaPasswordPage';
+import RicaricaPage from './pages/home/Ricarica.Page' //Aggiungi/verifica il percorso del file RicaricaPage
+import { TransactionsList } from './components/Transaction.List';
+import ProfilePage from './pages/home/ProfilePage';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -34,8 +35,16 @@ function App() {
       <Route path="/conferma/:token" element={<ConfermaPage />} />
 
       {/* Rotte Protette */}
-      <Route
-        path="/home"
+      <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+      <Route path="/ricarica" element={<ProtectedRoute><RicaricaPage /></ProtectedRoute>} />
+      <Route path="/movimento/:id" element={<ProtectedRoute><MovimentoDettaglioPage /></ProtectedRoute>} />
+      <Route path="/ricerca/:tipo" element={<ProtectedRoute><RicercaMovimentiPage /></ProtectedRoute>} />
+      <Route path="/movimenti" element={<ProtectedRoute><RicercaMovimentiPage /></ProtectedRoute>} />
+      <Route path="/modifica-password" element={<ProtectedRoute><ModificaPasswordPage /></ProtectedRoute>} />
+      
+      {/* Rotta Movimenti / Transactions */}
+      <Route 
+        path="/transactions" 
         element={
           <ProtectedRoute>
             <HomePage />
@@ -92,6 +101,8 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* Catch-all: Redireziona a /home se l'utente è loggato, altrimenti a /login */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

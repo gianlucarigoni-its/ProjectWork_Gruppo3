@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import type { FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Home, Wallet, ArrowLeftRight, Send, Settings, CheckCircle2, AlertCircle, Smartphone } from 'lucide-react';
 import { api } from '../../utils/services/api';
 
-
-export interface RicaricaPayload {
+export interface TopUpPayload {
   phoneNumber: string;
   operator: string;
   amount: number;
@@ -21,181 +23,251 @@ const OPERATORS = [
 
 const AMOUNTS = [5, 10, 15, 20, 30, 50, 100];
 
-export const RicaricaForm: React.FC<{
-  onSubmit: (data: RicaricaPayload) => Promise<void>;
-  isLoading: boolean;
-}> = ({ onSubmit, isLoading }) => {
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [operator, setOperator] = useState('');
-  const [amount, setAmount] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
+const formattaValuta = (valore: number) =>
+  new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(valore);
 
-  const handleSubmit = (e: React.FormEvent) => {
+export default function RicaricaPage() {
+  const navigate = useNavigate();
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [operator, setOperator] = useState('TIM');
+  const [amount, setAmount] = useState<number>(10);
+  
+  const [caricamento, setCaricamento] = useState(false);
+  const [errore, setErrore] = useState<string | null>(null);
+  const [esito, setEsito] = useState<{
+    messaggio: string;
+    nuovoSaldo?: number;
+  } | null>(null);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setErrore(null);
 
     if (!operator) {
-      setError('Seleziona un operatore telefonico.');
+      setErrore('Seleziona un operatore telefonico dal menu.');
       return;
     }
 
     if (!phoneNumber.trim()) {
-      setError('Inserisci un numero di cellulare.');
+      setErrore('Inserisci un numero di cellulare.');
       return;
     }
 
     const cleanPhone = phoneNumber.replace(/\s+/g, '');
     const phoneRegex = /^(\+39)?3\d{8,9}$/;
     if (!phoneRegex.test(cleanPhone)) {
-      setError('Inserisci un numero di cellulare valido (es. 3331234567).');
+      setErrore('Inserisci un numero di cellulare valido (es. 3331234567).');
       return;
     }
 
     if (!amount || amount <= 0) {
-      setError('Seleziona un taglio di ricarica.');
+      setErrore('Seleziona un importo per la ricarica.');
       return;
     }
 
-    onSubmit({
+    setCaricamento(true);
+
+    const payload: TopUpPayload = {
       phoneNumber: cleanPhone,
       operator,
       amount,
-    });
-  };
+    };
 
-  return (
-    <form onSubmit={handleSubmit} className="ricarica-form">
-      {/* 1. Selezione Operatore */}
-      <div className="form-group">
-        <label className="form-label">1. Seleziona Operatore</label>
-        <div className="operator-grid">
-          {OPERATORS.map((op) => (
-            <button
-              type="button"
-              key={op.id}
-              className={`operator-card ${operator === op.id ? 'active' : ''}`}
-              onClick={() => setOperator(op.id)}
-            >
-              {op.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 2. Numero di Telefono */}
-      <div className="form-group">
-        <label htmlFor="phoneNumber" className="form-label">
-          2. Numero di Cellulare
-        </label>
-        <input
-          id="phoneNumber"
-          type="tel"
-          placeholder="Inserire numero di telefono..."
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          className="form-input"
-          maxLength={15}
-        />
-      </div>
-
-      {/* 3. Taglio di Ricarica */}
-      <div className="form-group">
-        <label className="form-label">3. Importo Ricarica</label>
-        <div className="amount-grid">
-          {AMOUNTS.map((amt) => (
-            <button
-              type="button"
-              key={amt}
-              className={`amount-card ${amount === amt ? 'active' : ''}`}
-              onClick={() => setAmount(amt)}
-            >
-              {amt} €
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Errore di validazione locale */}
-      {error && <div className="alert alert-error">{error}</div>}
-
-      {/* Pulsante Invio */}
-      <button type="submit" disabled={isLoading} className="btn-submit">
-        {isLoading ? 'Elaborazione in corso...' : 'Conferma Ricarica'}
-      </button>
-    </form>
-  );
-};
-
-export default function RicaricaPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [resultMessage, setResultMessage] = useState<{
-    type: 'success' | 'error';
-    text: string;
-    newBalance?: number;
-  } | null>(null);
-
-  const handleRicaricaSubmit = async (payload: RicaricaPayload) => {
-    setIsLoading(true);
-    setResultMessage(null);
-    
     try {
-      // Inviando direttamente payload come secondo argomento
-      const response = await api.post('/operations/ricarica', payload);
-      const data = response.data;
-    
-      if (data.success) {
-        setResultMessage({
-          type: 'success',
-          text: `Ricarica di ${payload.amount}€ eseguita con successo su ${payload.phoneNumber}!`,
-          newBalance: data.newBalance,
-        });
-      } else {
-        setResultMessage({
-          type: 'error',
-          text: data.message || 'Si è verificato un errore durante la ricarica.',
-        });
-      }
-    } catch (err: any) {
-      setResultMessage({
-        type: 'error',
-        text: err.response?.data?.message || 'Errore di connessione con il server. Riprova più tardi.',
+      // Chiamata all'endpoint del backend: POST /transactions/topup
+      const response = await api.post('/transactions/topup', payload);
+
+      setEsito({
+        messaggio: `Ricarica di ${amount}€ eseguita con successo sul numero ${cleanPhone} (${operator})!`,
+        nuovoSaldo: response.data?.newBalance ?? response.data?.balance ?? response.data?.saldo,
       });
+    } catch (err: any) {
+      if (err?.response?.status === 401) {
+        localStorage.clear();
+        navigate('/login');
+        return;
+      }
+      setErrore(
+        err?.response?.data?.message || 
+        err?.response?.data?.error || 
+        'Errore durante l\'esecuzione della ricarica.'
+      );
     } finally {
-      setIsLoading(false);
+      setCaricamento(false);
     }
   };
 
   return (
-    <div className="ricarica-page-container">
-      <div className="ricarica-card-wrapper">
-        <header className="ricarica-header">
-          <h1>Ricarica Telefonica</h1>
-          <p>Ricarica il tuo cellulare</p>
-        </header>
+    <div className="dashboard-container">
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <img src="/img/3Vision_DigitalBank_LogoRMBG_white.png" alt="3Vision Logo" />
+        </div>
 
-        {resultMessage?.type === 'success' ? (
-          <div className="success-banner">
-            <div className="icon-success">✓</div>
-            <h3>Ricarica Completata!</h3>
-            <p>{resultMessage.text}</p>
-            {resultMessage.newBalance !== undefined && (
-              <p className="balance-info">
-                Nuovo Saldo: <strong>{resultMessage.newBalance.toFixed(2)} €</strong>
-              </p>
-            )}
-            <button className="btn-secondary" onClick={() => setResultMessage(null)}>
-              Effettua un'altra ricarica
-            </button>
+        <nav className="sidebar-nav">
+          <Link to="/home" className="nav-item">
+            <Home size={20} />
+            <span>Home</span>
+          </Link>
+          <Link to="/ricarica" className="nav-item active">
+            <Wallet size={20} />
+            <span>Ricarica</span>
+          </Link>
+          <Link to="/movimenti" className="nav-item">
+            <ArrowLeftRight size={20} />
+            <span>Movimenti</span>
+          </Link>
+          <Link to="/bonifico" className="nav-item">
+            <Send size={20} />
+            <span>Bonifico</span>
+          </Link>
+          <Link to="/impostazioni" className="nav-item">
+            <Settings size={20} />
+            <span>Impostazioni</span>
+          </Link>
+        </nav>
+      </aside>
+
+      <main className="main-content">
+        <div className="dashboard-body">
+          <div className="welcome-header">
+            <h1>Ricarica Telefonica</h1>
+            <p>Seleziona l'operatore e l'importo desiderato</p>
           </div>
-        ) : (
-          <>
-            {resultMessage?.type === 'error' && (
-              <div className="alert alert-error">{resultMessage.text}</div>
+
+          <div className="ricerca-card" style={{ maxWidth: '650px', margin: '0 auto', padding: '2rem' }}>
+            {esito ? (
+              <div style={{ textAlign: 'center', padding: '1rem' }}>
+                <CheckCircle2 size={56} color="#10b981" style={{ marginBottom: '1rem' }} />
+                <h2 style={{ color: '#f3f4f6', marginBottom: '0.5rem' }}>Operazione Riuscita!</h2>
+                <p style={{ color: '#9ca3af', marginBottom: '1.5rem', fontSize: '1rem' }}>{esito.messaggio}</p>
+                {esito.nuovoSaldo !== undefined && (
+                  <p className="balance-amount" style={{ fontSize: '1.3rem', marginBottom: '1.5rem' }}>
+                    Nuovo Saldo: <strong>{formattaValuta(esito.nuovoSaldo)}</strong>
+                  </p>
+                )}
+                <button className="btn-primary" onClick={() => setEsito(null)}>
+                  Nuova Ricarica
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                {errore && (
+                  <div className="ricerca-error" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                    <AlertCircle size={18} />
+                    <span>{errore}</span>
+                  </div>
+                )}
+
+                {/* Grid 2 Colonne: Operatore + Numero Telefono */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div>
+                    <label htmlFor="operatorSelect" style={{ fontWeight: 600, marginBottom: '0.4rem', display: 'block', fontSize: '0.85rem', color: '#9ca3af' }}>
+                      1. OPERATORE TELEFONICO
+                    </label>
+                    <select
+                      id="operatorSelect"
+                      value={operator}
+                      onChange={(e) => setOperator(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        borderRadius: '8px',
+                        border: '1px solid #374151',
+                        backgroundColor: '#1f2937',
+                        color: '#f3f4f6',
+                        fontSize: '0.95rem',
+                        outline: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {OPERATORS.map((op) => (
+                        <option key={op.id} value={op.id}>
+                          {op.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="phoneInput" style={{ fontWeight: 600, marginBottom: '0.4rem', display: 'block', fontSize: '0.85rem', color: '#9ca3af' }}>
+                      2. NUMERO DI CELLULARE
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        id="phoneInput"
+                        type="tel"
+                        placeholder="es. 3331234567"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        maxLength={15}
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem 0.75rem 0.75rem 2.4rem',
+                          borderRadius: '8px',
+                          border: '1px solid #374151',
+                          backgroundColor: '#1f2937',
+                          color: '#f3f4f6',
+                          fontSize: '0.95rem',
+                          outline: 'none',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                      <Smartphone size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Importi Disposti in Orizzontale */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ fontWeight: 600, marginBottom: '0.6rem', display: 'block', fontSize: '0.85rem', color: '#9ca3af' }}>
+                    3. TAGLIO RICARICA
+                  </label>
+                  <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '0.3rem' }}>
+                    {AMOUNTS.map((amt) => {
+                      const selected = amount === amt;
+                      return (
+                        <button
+                          type="button"
+                          key={amt}
+                          onClick={() => setAmount(amt)}
+                          style={{
+                            flex: '1 1 0px',
+                            minWidth: '55px',
+                            padding: '0.75rem 0.2rem',
+                            borderRadius: '8px',
+                            border: selected ? '2px solid #ff6b00' : '1px solid #374151',
+                            backgroundColor: selected ? 'rgba(255, 107, 0, 0.2)' : '#1f2937',
+                            color: selected ? '#ff6b00' : '#f3f4f6',
+                            fontWeight: selected ? 'bold' : 'normal',
+                            cursor: 'pointer',
+                            textAlign: 'center',
+                            transition: 'all 0.2s ease',
+                            fontSize: '0.95rem',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {amt} €
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Pulsante di Conferma */}
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={caricamento}
+                  style={{ width: '100%', marginTop: '1rem', padding: '0.85rem', cursor: 'pointer' }}
+                >
+                  {caricamento ? 'Elaborazione in corso...' : 'Conferma Ricarica'}
+                </button>
+              </form>
             )}
-            <RicaricaForm onSubmit={handleRicaricaSubmit} isLoading={isLoading} />
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
