@@ -89,14 +89,28 @@ export default function HomePage() {
       try {
         const resMovimenti = await axios.get('http://localhost:3000/api/movimenti/recenti', config);
         console.log("RISPOSTA SERVER MOVIMENTI:", resMovimenti.data);
-        setMovimentiRecenti(Array.isArray(resMovimenti.data) ? resMovimenti.data : []);
+
+        // Estrae l'array se risiede dentro un campo dell'oggetto (es. resMovimenti.data.data) o se è già un array
+        const listaMovimenti = Array.isArray(resMovimenti.data)
+          ? resMovimenti.data
+          : (resMovimenti.data.data || resMovimenti.data.transactions || resMovimenti.data.movimenti || []);
+
+        // Normalizza le proprietà del movimento in caso abbiano nomi diversi dal DB
+        const movimentiFormattati = listaMovimenti.map((m: any) => ({
+          id: m.id || m._id,
+          descrizione: m.descrizione || m.description || m.type || 'Movimento',
+          data: m.data ? new Date(m.data).toLocaleDateString('it-IT') : (m.createdAt ? new Date(m.createdAt).toLocaleDateString('it-IT') : ''),
+          importo: m.importo ?? m.amount ?? 0,
+          tipo: m.tipo || (Number(m.importo ?? m.amount) >= 0 ? 'positivo' : 'negativo')
+        }));
+
+        setMovimentiRecenti(movimentiFormattati);
       } catch (err: any) {
         console.error('Errore recupero movimenti:', err);
         setMovimentiRecenti([]);
       } finally {
         setCaricamento(false);
-      }
-    };
+      }};
 
     caricaDatiDashboard();
   }, [navigate]);
