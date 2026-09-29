@@ -7,9 +7,9 @@ const router = Router({ mergeParams: true });
 
 // Rotta per recuperare i movimenti (gestisce sia la radice che /recenti per il frontend)
 router.get("/", validate(Filter, "query"), find);
-router.get("/:id", validate(TypeID, "params"), findById);
-
 router.get("/download", validate(DownloadDTO, "query"), download);
+
+router.get("/:id", validate(TypeID, "params"), findById);
 router.post("/transfer", validate(TransferDto, "body"), transfer);
 router.post("/topup", validate(TopUpDto, "body"), topUp);
 
