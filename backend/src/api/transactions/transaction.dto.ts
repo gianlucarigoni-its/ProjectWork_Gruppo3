@@ -47,7 +47,7 @@ export class TransferDto {
   IBAN: string;
 
   @Type(() => Number)
-  @IsInt()
+  @IsNumber()
   amount: number;
 }
 
@@ -59,7 +59,7 @@ export class TopUpDto {
   operator: string;
 
   @Type(() => Number)
-  @IsInt()
+  @IsNumber()
   amount: number;
 }
 
