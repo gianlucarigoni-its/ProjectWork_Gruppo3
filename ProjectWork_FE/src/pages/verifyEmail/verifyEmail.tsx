@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { api } from '../../utils/services/api';
+import { CheckCircle2, XCircle } from "lucide-react";
+import { api } from "../../utils/services/api";
 
-// Se usi TypeScript, definisci l'interfaccia della risposta
 interface VerifyResponse {
   success: boolean;
   message: string;
@@ -16,6 +16,9 @@ export const ConfermaPage: React.FC = () => {
   const [success, setSuccess] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
 
+  // Evita la doppia chiamata di React StrictMode in sviluppo
+  const hasCalled = useRef<boolean>(false);
+
   useEffect(() => {
     if (!token) {
       setLoading(false);
@@ -23,19 +26,20 @@ export const ConfermaPage: React.FC = () => {
       return;
     }
 
+    if (hasCalled.current) return;
+    hasCalled.current = true;
+
     const verify = async () => {
       try {
-        // Chiamata allineata alla tua istanza api (Axios)
-        const response = await api.get<VerifyResponse>(`/auth/verify-email?token=${token}`);
-        
-        // Con Axios, se arrivi qui la chiamata ha restituito un codice 200/2xx
+        const response = await api.get<VerifyResponse>("/auth/verify-email", {
+          params: { token },
+        });
         setSuccess(true);
         setMessage(response.data.message || "Email verificata con successo!");
       } catch (error: any) {
         setSuccess(false);
-        // Recupera il messaggio d'errore inviato dal backend, altrimenti usa un fallback
-        const errorMessage = error.response?.data?.message || "Token non valido o scaduto.";
-        setMessage(errorMessage);
+        const msg = error.response?.data?.message;
+        setMessage(Array.isArray(msg) ? msg.join(" ") : msg || "Token non valido o scaduto.");
       } finally {
         setLoading(false);
       }
@@ -45,27 +49,46 @@ export const ConfermaPage: React.FC = () => {
   }, [token]);
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-      <div style={{ padding: "2rem", border: "1px solid #ddd", borderRadius: "8px", textAlign: "center", maxWidth: "400px" }}>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-brand">
+          <img
+            src="/img/3Vision_DigitalBank_LogoRMBG_white.png"
+            alt="3Vision Logo"
+            className="auth-logo-img"
+          />
+        </div>
+
+        <div className="auth-header">
+          <h2>Verifica account</h2>
+          <p className="auth-subtitle">Conferma la tua email per attivare il conto</p>
+        </div>
+
         {loading ? (
-          <h2>Verifica della mail in corso...</h2>
+          <div className="result-state" role="status" aria-busy="true">
+            <span className="spinner spinner-lg" aria-hidden="true" />
+            <p>Verifica in corso...</p>
+          </div>
         ) : success ? (
-          <>
-            <h2 style={{ color: "green" }}>Email Confermata!</h2>
+          <div className="result-state" role="status">
+            <CheckCircle2 size={56} className="result-icon" aria-hidden="true" />
             <p>{message}</p>
-            <button 
-              onClick={() => navigate("/login")} 
-              style={{ padding: "10px 20px", marginTop: "15px", cursor: "pointer" }}
+            <button
+              type="button"
+              onClick={() => navigate("/login")}
+              className="btn-primary btn-block"
             >
-              Vai al Login
+              Vai al login
             </button>
-          </>
+          </div>
         ) : (
-          <>
-            <h2 style={{ color: "red" }}>Verifica Fallita</h2>
+          <div className="result-state" role="alert">
+            <XCircle size={56} className="result-icon error" aria-hidden="true" />
             <p>{message}</p>
-            <Link to="/register">Torna alla pagina di Registrazione</Link>
-          </>
+            <p className="auth-footer-text">
+              Vuoi riprovare? <Link to="/register">Torna alla registrazione</Link>
+            </p>
+          </div>
         )}
       </div>
     </div>

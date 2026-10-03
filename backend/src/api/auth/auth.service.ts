@@ -75,8 +75,6 @@ export class AuthService {
       { $set: { "credentials.hashedPassword": hashedPassword } },
     );
 
-    console.log("CHANGE PASSWORD RESULT:", updated);
-
     if (updated.matchedCount === 0) {
       throw new Error("Utente non trovato");
     }

@@ -1,56 +1,114 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { api } from '../../utils/services/api';
-import type { MovimentoDettaglio } from '../../types';
+import { useEffect, useState, useCallback } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Receipt } from "lucide-react";
+import { api } from "../../utils/services/api";
+import type { Transaction } from "../../types/transaction";
+import { ETICHETTE_CATEGORIE } from "../../utils/categorie";
+
+const formattaValuta = (valore: number) =>
+  new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(valore);
 
 export default function MovimentoDettaglioPage() {
   const { id } = useParams<{ id: string }>();
-  const [movimento, setMovimento] = useState<MovimentoDettaglio | null>(null);
+  const navigate = useNavigate();
+  const [movimento, setMovimento] = useState<Transaction | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
   const [caricamento, setCaricamento] = useState(true);
 
-  useEffect(() => {
-    const caricaMovimento = async () => {
-      try {
-        const response = await api.get<MovimentoDettaglio>(`/account/movimenti/${id}`);
-        setMovimento(response.data);
-      } catch {
-        setErrore('Impossibile caricare il dettaglio del movimento.');
-      } finally {
-        setCaricamento(false);
+  const caricaMovimento = useCallback(async () => {
+    setCaricamento(true);
+    setErrore(null);
+    try {
+      const response = await api.get<Transaction>(`/transactions/${id}`);
+      setMovimento(response.data);
+    } catch (err: any) {
+      if (err?.response?.status === 401) {
+        localStorage.clear();
+        navigate("/login");
+        return;
       }
-    };
-    caricaMovimento();
-  }, [id]);
+      setErrore(
+        err?.response?.status === 404
+          ? "Movimento non trovato."
+          : "Impossibile caricare il dettaglio del movimento.",
+      );
+    } finally {
+      setCaricamento(false);
+    }
+  }, [id, navigate]);
 
-  if (caricamento) return <div className="pagina">Caricamento...</div>;
-  if (errore) return <div className="pagina errore">{errore}</div>;
-  if (!movimento) return null;
+  useEffect(() => {
+    caricaMovimento();
+  }, [caricaMovimento]);
+
+  const entrata = movimento?.type === "income";
 
   return (
-    <div className="pagina dettaglio-page">
-      <Link to="/home">&larr; Torna alla Home</Link>
-      <h1>Dettaglio Movimento</h1>
+    <>
+      <Link to="/movimenti" className="back-link">
+        <ArrowLeft size={16} aria-hidden="true" /> Torna ai movimenti
+      </Link>
 
-      <dl className="dettaglio-lista">
-        <dt>Data</dt>
-        <dd>{new Date(movimento.data).toLocaleString('it-IT')}</dd>
+      <div className="welcome-header">
+        <h1>Dettaglio movimento</h1>
+      </div>
 
-        <dt>Descrizione</dt>
-        <dd>{movimento.descrizioneEstesa}</dd>
+      {errore && (
+        <div className="alert alert-error alert-with-action detail-card" role="alert">
+          <span>{errore}</span>
+          <button type="button" className="btn-ghost btn-sm" onClick={caricaMovimento}>
+            Riprova
+          </button>
+        </div>
+      )}
 
-        <dt>Categoria</dt>
-        <dd>{movimento.categoriaMovimentoId?.nomeCategoria ?? '-'}</dd>
+      {caricamento && (
+        <div aria-busy="true" className="detail-card">
+          <div className="skeleton profile-skeleton" />
+          <div className="skeleton profile-skeleton" />
+        </div>
+      )}
 
-        <dt>Tipologia</dt>
-        <dd>{movimento.categoriaMovimentoId?.tipologia ?? '-'}</dd>
+      {!caricamento && movimento && (
+        <div className="detail-card">
+          <div className="detail-hero">
+            <span className="detail-label">{entrata ? "Entrata" : "Uscita"}</span>
+            <span className={`detail-amount ${entrata ? "positivo" : "negativo"}`}>
+              {entrata ? "+" : "-"}
+              {formattaValuta(Math.abs(movimento.amount))}
+            </span>
+            <span className="category-badge">
+              {ETICHETTE_CATEGORIE[movimento.category] ?? movimento.category}
+            </span>
+          </div>
 
-        <dt>Importo</dt>
-        <dd>{movimento.importo.toFixed(2)} EUR</dd>
-
-        <dt>Saldo dopo il movimento</dt>
-        <dd>{movimento.saldo.toFixed(2)} EUR</dd>
-      </dl>
-    </div>
+          <section className="info-card">
+            <h3>
+              <Receipt size={20} aria-hidden="true" /> Dettagli
+            </h3>
+            <dl className="info-list">
+              <div className="info-row">
+                <dt>Data e ora</dt>
+                <dd>{new Date(movimento.date).toLocaleString("it-IT")}</dd>
+              </div>
+              <div className="info-row">
+                <dt>Categoria</dt>
+                <dd>{ETICHETTE_CATEGORIE[movimento.category] ?? movimento.category}</dd>
+              </div>
+              <div className="info-row">
+                <dt>Tipologia</dt>
+                <dd>{entrata ? "Entrata" : "Uscita"}</dd>
+              </div>
+              {movimento.id && (
+                <div className="info-row">
+                  <dt>ID movimento</dt>
+                  <dd className="mono">{movimento.id}</dd>
+                </div>
+              )}
+            </dl>
+          </section>
+        </div>
+      )}
+    </>
   );
 }

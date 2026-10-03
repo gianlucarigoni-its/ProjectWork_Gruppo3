@@ -1,8 +1,8 @@
-@use 'variables' as *;
+@use "variables" as *;
 
 .welcome-header {
   h1 {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 4vw, 2rem);
     font-weight: 700;
     margin-bottom: 0.25rem;
     color: $text-white;
@@ -19,6 +19,10 @@
   grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
 
+  > * {
+    min-width: 0;
+  }
+
   @include mobile {
     grid-template-columns: 1fr;
   }
@@ -26,10 +30,8 @@
 
 // Box Saldo Grande
 .balance-card {
+  @include card(1.75rem);
   background: $gradient-balance-card;
-  border: 1px solid $border-color;
-  border-radius: $radius-lg;
-  padding: 1.75rem;
   margin-bottom: 1.5rem;
 
   .balance-header {
@@ -61,15 +63,22 @@
     color: $text-white;
     margin-top: 0.75rem;
     letter-spacing: -1px;
+    font-variant-numeric: tabular-nums;
+
+    @include small-mobile {
+      font-size: 2rem;
+    }
+
+    .balance-skeleton {
+      width: min(260px, 70%);
+      height: 2.75rem;
+    }
   }
 }
 
 // Widget Ultimi Movimenti in Home
 .transactions-card {
-  background: $bg-card;
-  border: 1px solid $border-color;
-  border-radius: $radius-lg;
-  padding: 1.5rem;
+  @include card;
 
   .card-header {
     display: flex;
@@ -101,6 +110,10 @@
     flex-direction: column;
     gap: 0.75rem;
 
+    .tx-skeleton {
+      height: 58px;
+    }
+
     .transaction-item {
       display: flex;
       justify-content: space-between;
@@ -128,10 +141,16 @@
 
       .tx-amount {
         font-weight: 600;
-        font-size: 0.95rem;
+        font-size: $fs-md;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
 
-        &.positivo { color: $accent-green; }
-        &.negativo { color: $error-color; }
+        &.positivo {
+          color: $accent-green;
+        }
+        &.negativo {
+          color: $error-color;
+        }
       }
     }
   }
@@ -139,10 +158,7 @@
 
 // Widget Azioni Rapide
 .quick-actions-card {
-  background: $bg-card;
-  border: 1px solid $border-color;
-  border-radius: $radius-lg;
-  padding: 1.5rem;
+  @include card;
 
   h3 {
     margin-bottom: 1rem;
@@ -173,6 +189,11 @@
       &:hover {
         border-color: $accent-orange;
         transform: translateY(-2px);
+        box-shadow: $shadow-card;
+      }
+
+      &:active {
+        transform: none;
       }
 
       .action-icon {
@@ -181,9 +202,18 @@
         border-radius: $radius-sm;
         @include flex-center;
 
-        &.orange { background: rgba(249, 115, 22, 0.2); color: $accent-orange; }
-        &.green { background: rgba(16, 185, 129, 0.2); color: $accent-green; }
-        &.dark { background: rgba(255, 255, 255, 0.1); color: $text-white; }
+        &.orange {
+          background: rgba($accent-orange, 0.2);
+          color: $accent-orange;
+        }
+        &.green {
+          background: rgba($accent-green, 0.2);
+          color: $accent-green;
+        }
+        &.dark {
+          background: rgba($text-white, 0.1);
+          color: $text-white;
+        }
       }
     }
   }

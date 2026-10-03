@@ -12,13 +12,9 @@ apiRouter.use("/auth", authRouter);
 // Middleware di autenticazione per le rotte protette
 apiRouter.use(isAuthenticated);
 
-// Rotte per il conto (sia in inglese che in italiano)
-apiRouter.use("/account", accountsRouter);
 apiRouter.use("/accounts", accountsRouter);
-apiRouter.use("/conto", accountsRouter); // Mappatura per il frontend (/api/conto)
 
 // Rotte per i movimenti/transazioni (sia in inglese che in italiano)
 apiRouter.use("/transactions", transactionsRouter);
-apiRouter.use("/movimenti", transactionsRouter); // Mappatura per il frontend (/api/movimenti)
 
 export default apiRouter;

@@ -12,8 +12,8 @@
     background: $bg-card;
     border: 1px solid $border-color;
     border-radius: $radius-lg;
-    padding: 1.5rem 1.75rem;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    padding: 1.75rem;
+    box-shadow: $shadow-pop;
 
     .auth-brand {
       @include flex-center;
@@ -43,18 +43,21 @@
       }
 
       .timer-badge {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
         margin-top: 0.5rem;
+
         padding: 0.25rem 0.65rem;
-        background: rgba(249, 115, 22, 0.1);
-        border: 1px solid rgba(249, 115, 22, 0.3);
-        border-radius: 20px;
+        background: rgba($accent-orange, 0.1);
+        border: 1px solid rgba($accent-orange, 0.3);
+        border-radius: $radius-pill;
         font-size: 0.75rem;
-        color: #fb923c;
+        color: $text-orange-soft;
 
         &.warning {
           background: $error-bg;
-          border-color: rgba(239, 68, 68, 0.4);
+          border-color: $error-border;
           color: $error-color;
         }
       }
@@ -66,36 +69,11 @@
       gap: 0.75rem;
     }
 
-    /* Pulsante d'azione integrato */
+    // Il bottone usa il sistema condiviso (.btn-primary, alias .auth-btn in _components)
+    .auth-form .btn-primary,
     .auth-btn {
-      margin-top: 0.5rem;
       width: 100%;
-      padding: 0.75rem;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.92rem;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-      transition: all 0.2s ease;
-    }
-
-    .auth-btn:hover {
-      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
-      transform: translateY(-1px);
-    }
-
-    .auth-btn:active {
-      transform: translateY(0);
-    }
-
-    .auth-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
+      margin-top: 0.5rem;
     }
 
     .auth-footer-text {

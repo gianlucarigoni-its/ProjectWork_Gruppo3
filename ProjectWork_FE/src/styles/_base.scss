@@ -1,5 +1,9 @@
 @use 'variables' as *;
 
+:root {
+  color-scheme: dark;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -11,6 +15,7 @@ body {
   background-color: $bg-dark;
   color: $text-main;
   min-height: 100vh;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -19,6 +24,40 @@ a {
   text-decoration: none;
 }
 
-button, input, select {
+button, input, select, textarea {
   font-family: inherit;
+}
+
+img, svg {
+  max-width: 100%;
+}
+
+// Focus visibile per chi naviga da tastiera (non compare al click col mouse)
+:focus-visible {
+  outline: 2px solid $accent-orange;
+  outline-offset: 2px;
+}
+
+// Testo solo per screen reader (label di icone, ecc.)
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+// Importi: cifre di larghezza uguale, colonne allineate
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

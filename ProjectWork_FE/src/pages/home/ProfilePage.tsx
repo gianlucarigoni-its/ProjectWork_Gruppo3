@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../utils/services/api";
-import { User, ShieldCheck, CreditCard, Hash } from "lucide-react";
+import { User, ShieldCheck, CreditCard, Hash, Copy, Check, KeyRound } from "lucide-react";
 
 export interface ProfileResponse {
   id: string;
@@ -12,145 +13,187 @@ export interface ProfileResponse {
   createdAt: string;
 }
 
+const formatData = (isoString: string): string => {
+  if (!isoString) return "N/D";
+  return new Date(isoString).toLocaleDateString("it-IT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
+const formatSaldo = (val: number): string =>
+  new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(
+    typeof val === "number" ? val : 0,
+  );
+
+// IBAN a gruppi di 4 per leggerlo meglio (si copia comunque senza spazi)
+const formatIban = (iban: string): string =>
+  iban
+    .replace(/\s/g, "")
+    .replace(/(.{4})/g, "$1 ")
+    .trim();
+
+const iniziali = (nome: string, cognome: string): string =>
+  `${nome?.[0] ?? ""}${cognome?.[0] ?? ""}`.toUpperCase() || "?";
+
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const [profilo, setProfilo] = useState<ProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [copiato, setCopiato] = useState(false);
+
+  const fetchProfilo = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+      const response = await api.get("/accounts/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProfilo(response.data);
+    } catch (err: any) {
+      console.error("Errore durante il recupero del profilo:", err);
+      if (err?.response?.status === 401) {
+        localStorage.clear();
+        navigate("/login");
+        return;
+      }
+      setError("Impossibile caricare i dati del profilo.");
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate]);
 
   useEffect(() => {
-    const fetchProfilo = async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        const response = await api.get("/accounts/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        setProfilo(response.data);
-      } catch (err) {
-        console.error("Errore durante il recupero del profilo:", err);
-        setError("Impossibile caricare i dati del profilo.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfilo();
-  }, []);
+  }, [fetchProfilo]);
 
-  // Helper per formattare la data di creazione
-  const formatData = (isoString: string): string => {
-    if (!isoString) return "N/D";
-    return new Date(isoString).toLocaleDateString("it-IT", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
-
-  // Helper per formattare il saldo in Euro
-  const formatSaldo = (val: number): string => {
-    if (typeof val !== "number") return "0,00 €";
-    return new Intl.NumberFormat("it-IT", {
-      style: "currency",
-      currency: "EUR",
-    }).format(val);
+  const copiaIban = async () => {
+    if (!profilo) return;
+    try {
+      await navigator.clipboard.writeText(profilo.IBAN.replace(/\s/g, ""));
+      setCopiato(true);
+      setTimeout(() => setCopiato(false), 2000);
+    } catch {
+      // clipboard non disponibile: nessun feedback, l'IBAN resta selezionabile a mano
+    }
   };
 
   return (
-    <div className="dashboard-body">
+    <>
       <div className="welcome-header">
-        <h1>Il mio Profilo</h1>
+        <h1>Il mio profilo</h1>
+        <p>I dati del tuo account e del tuo conto</p>
       </div>
 
-      {loading && <p className="ricerca-empty">Caricamento in corso...</p>}
-      {error && <p className="ricerca-error">{error}</p>}
-
-      {!loading && !error && profilo && (
-        <div className="dashboard-grid">
-          {/* Dati Personali */}
-          <div className="transactions-card">
-            <div className="card-header">
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <User size={20} />
-                <h3>Informazioni Utente</h3>
-              </div>
-            </div>
-            <div className="transactions-list">
-              <div className="transaction-item">
-                <span className="tx-date">Nome</span>
-                <span className="tx-title">{profilo.firstName}</span>
-              </div>
-              <div className="transaction-item">
-                <span className="tx-date">Cognome</span>
-                <span className="tx-title">{profilo.lastName}</span>
-              </div>
-              <div className="transaction-item">
-                <span className="tx-date">Username</span>
-                <span className="tx-title">{profilo.username}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Dettagli Conto */}
-          <div className="transactions-card">
-            <div className="card-header">
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <CreditCard size={20} />
-                <h3>Dettagli Conto</h3>
-              </div>
-            </div>
-            <div className="transactions-list">
-              <div className="transaction-item">
-                <span className="tx-date">IBAN</span>
-                <span className="tx-title">{profilo.IBAN}</span>
-              </div>
-              <div className="transaction-item">
-                <span className="tx-date">Saldo Disponibile</span>
-                <span className="tx-amount positivo">{formatSaldo(profilo.balance)}</span>
-              </div>
-              <div className="transaction-item">
-                <span className="tx-date">Stato Conto</span>
-                <span
-                  className="tx-amount positivo"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "0.3rem",
-                    fontSize: "0.85rem",
-                  }}
-                >
-                  <ShieldCheck size={14} /> Attivo
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Info Account */}
-          <div className="transactions-card">
-            <div className="card-header">
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <Hash size={20} />
-                <h3>Dettagli Registrazione</h3>
-              </div>
-            </div>
-            <div className="transactions-list">
-              <div className="transaction-item">
-                <span className="tx-date">ID Account</span>
-                <span className="tx-title" style={{ fontFamily: "monospace" }}>
-                  {profilo.id}
-                </span>
-              </div>
-              <div className="transaction-item">
-                <span className="tx-date">Data Apertura</span>
-                <span className="tx-title">{formatData(profilo.createdAt)}</span>
-              </div>
-            </div>
-          </div>
+      {error && (
+        <div className="alert alert-error alert-with-action" role="alert">
+          <span>{error}</span>
+          <button type="button" className="btn-ghost btn-sm" onClick={fetchProfilo}>
+            Riprova
+          </button>
         </div>
       )}
-    </div>
+
+      {loading && (
+        <div aria-busy="true">
+          <div className="skeleton profile-skeleton" />
+          <div className="skeleton profile-skeleton" />
+        </div>
+      )}
+
+      {!loading && !error && profilo && (
+        <>
+          <div className="profile-hero">
+            <div className="profile-avatar" aria-hidden="true">
+              {iniziali(profilo.firstName, profilo.lastName)}
+            </div>
+            <div className="profile-hero-text">
+              <h2>
+                {profilo.firstName} {profilo.lastName}
+              </h2>
+              <p>{profilo.username}</p>
+              <span className="status-badge">
+                <ShieldCheck size={14} aria-hidden="true" /> Conto attivo
+              </span>
+            </div>
+            <Link to="/modifica-password" className="btn-ghost">
+              <KeyRound size={16} aria-hidden="true" /> Modifica password
+            </Link>
+          </div>
+
+          <div className="info-grid">
+            <section className="info-card">
+              <h3>
+                <User size={20} aria-hidden="true" /> Informazioni utente
+              </h3>
+              <dl className="info-list">
+                <div className="info-row">
+                  <dt>Nome</dt>
+                  <dd>{profilo.firstName}</dd>
+                </div>
+                <div className="info-row">
+                  <dt>Cognome</dt>
+                  <dd>{profilo.lastName}</dd>
+                </div>
+                <div className="info-row">
+                  <dt>Username</dt>
+                  <dd>{profilo.username}</dd>
+                </div>
+              </dl>
+            </section>
+
+            <section className="info-card">
+              <h3>
+                <CreditCard size={20} aria-hidden="true" /> Dettagli conto
+              </h3>
+              <dl className="info-list">
+                <div className="info-row">
+                  <dt>IBAN</dt>
+                  <dd className="mono">
+                    {formatIban(profilo.IBAN)}
+                    <button
+                      type="button"
+                      className={`icon-btn${copiato ? " done" : ""}`}
+                      onClick={copiaIban}
+                      aria-label={copiato ? "IBAN copiato" : "Copia IBAN"}
+                      title={copiato ? "Copiato!" : "Copia IBAN"}
+                    >
+                      {copiato ? <Check size={16} /> : <Copy size={16} />}
+                    </button>
+                  </dd>
+                </div>
+                <div className="info-row">
+                  <dt>Saldo disponibile</dt>
+                  <dd className="tabular">{formatSaldo(profilo.balance)}</dd>
+                </div>
+              </dl>
+            </section>
+
+            <section className="info-card">
+              <h3>
+                <Hash size={20} aria-hidden="true" /> Dettagli registrazione
+              </h3>
+              <dl className="info-list">
+                <div className="info-row">
+                  <dt>ID account</dt>
+                  <dd className="mono">{profilo.id}</dd>
+                </div>
+                <div className="info-row">
+                  <dt>Data apertura</dt>
+                  <dd>{formatData(profilo.createdAt)}</dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+        </>
+      )}
+    </>
   );
 }

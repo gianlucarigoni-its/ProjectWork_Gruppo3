@@ -1,36 +1,43 @@
-import { useState } from 'react';
-import type { FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { authService } from '../../utils/services/authService';
-import logoImg from '../../../public/img/3Vision_DigitalBank_LogoRMBG_white.png';
-
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { authService } from "../../utils/services/authService";
 
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const REGEX_PASSWORD = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
+// Stessa regola del backend (ChangePasswordDto); se RegisterDto è diverso, adattala
+const REGEX_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
 export default function RegisterPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confermaPassword, setConfermaPassword] = useState('');
-  const [nomeTitolare, setNomeTitolare] = useState('');
-  const [cognomeTitolare, setCognomeTitolare] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confermaPassword, setConfermaPassword] = useState("");
+  const [nomeTitolare, setNomeTitolare] = useState("");
+  const [cognomeTitolare, setCognomeTitolare] = useState("");
   const [errore, setErrore] = useState<string | null>(null);
   const [messaggio, setMessaggio] = useState<string | null>(null);
   const [caricamento, setCaricamento] = useState(false);
   const navigate = useNavigate();
 
+  const nonCoincidono = confermaPassword !== "" && password !== confermaPassword;
+
   const validaForm = (): string | null => {
-    if (!email || !password || !confermaPassword || !nomeTitolare || !cognomeTitolare) {
-      return 'Tutti i campi sono obbligatori.';
+    if (
+      !email ||
+      !password ||
+      !confermaPassword ||
+      !nomeTitolare.trim() ||
+      !cognomeTitolare.trim()
+    ) {
+      return "Tutti i campi sono obbligatori.";
     }
     if (!REGEX_EMAIL.test(email)) {
-      return 'Inserisci un indirizzo email valido.';
+      return "Inserisci un indirizzo email valido.";
     }
     if (!REGEX_PASSWORD.test(password)) {
-      return 'La password deve avere almeno 8 caratteri, una maiuscola e un simbolo.';
+      return "La password deve avere almeno 8 caratteri, una maiuscola, una minuscola, un numero e un simbolo.";
     }
     if (password !== confermaPassword) {
-      return 'Le password non coincidono.';
+      return "Le password non coincidono.";
     }
     return null;
   };
@@ -52,14 +59,14 @@ export default function RegisterPage() {
         email,
         password,
         confermaPassword,
-        nomeTitolare,
-        cognomeTitolare,
+        nomeTitolare: nomeTitolare.trim(),
+        cognomeTitolare: cognomeTitolare.trim(),
       });
-      setMessaggio(response.data.message || 'Registrazione completata!');
-      setTimeout(() => navigate('/login'), 2500);
+      setMessaggio(response.data.message || "Registrazione completata!");
+      setTimeout(() => navigate("/login"), 2500);
     } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Errore durante la registrazione.';
-      setErrore(msg);
+      const msg = err?.response?.data?.message;
+      setErrore(Array.isArray(msg) ? msg.join(" ") : msg || "Errore durante la registrazione.");
     } finally {
       setCaricamento(false);
     }
@@ -68,9 +75,12 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        {/* Logo Reale */}
         <div className="auth-brand">
-          <img src={logoImg} alt="3Vision Logo" className="auth-logo-img" />
+          <img
+            src="/img/3Vision_DigitalBank_LogoRMBG_white.png"
+            alt="3Vision Logo"
+            className="auth-logo-img"
+          />
         </div>
 
         <div className="auth-header">
@@ -78,20 +88,28 @@ export default function RegisterPage() {
           <p className="auth-subtitle">Inizia a gestire le tue finanze in modo semplice</p>
         </div>
 
-        {errore && <div className="auth-alert error">{errore}</div>}
-        {messaggio && <div className="auth-alert success">{messaggio}</div>}
+        {errore && (
+          <div className="alert alert-error" role="alert">
+            {errore}
+          </div>
+        )}
+        {messaggio && (
+          <div className="alert alert-success" role="status">
+            {messaggio}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="auth-form" noValidate>
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="nome">Nome</label>
               <input
                 id="nome"
                 type="text"
+                autoComplete="given-name"
                 placeholder="Mario"
                 value={nomeTitolare}
                 onChange={(e) => setNomeTitolare(e.target.value)}
-                required
               />
             </div>
             <div className="form-group">
@@ -99,10 +117,10 @@ export default function RegisterPage() {
               <input
                 id="cognome"
                 type="text"
+                autoComplete="family-name"
                 placeholder="Rossi"
                 value={cognomeTitolare}
                 onChange={(e) => setCognomeTitolare(e.target.value)}
-                required
               />
             </div>
           </div>
@@ -112,10 +130,10 @@ export default function RegisterPage() {
             <input
               id="email"
               type="email"
+              autoComplete="email"
               placeholder="mario.rossi@esempio.it"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
             />
           </div>
 
@@ -124,27 +142,36 @@ export default function RegisterPage() {
             <input
               id="password"
               type="password"
-              placeholder="Min. 8 car, 1 maiuscola e 1 simbolo"
+              autoComplete="new-password"
+              aria-describedby="passwordHint"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
             />
+            <span id="passwordHint" className="field-hint">
+              Almeno 8 caratteri, una maiuscola, una minuscola, un numero e un simbolo.
+            </span>
           </div>
 
           <div className="form-group">
-            <label htmlFor="confermaPassword">Conferma Password</label>
+            <label htmlFor="confermaPassword">Conferma password</label>
             <input
               id="confermaPassword"
               type="password"
-              placeholder="Ripeti la tua password"
+              autoComplete="new-password"
+              aria-invalid={nonCoincidono}
               value={confermaPassword}
               onChange={(e) => setConfermaPassword(e.target.value)}
-              required
             />
+            {nonCoincidono && <span className="field-error">Le password non coincidono.</span>}
           </div>
 
-          <button type="submit" className="auth-btn" disabled={caricamento}>
-            {caricamento ? 'Registrazione in corso...' : 'Registrati'}
+          <button
+            type="submit"
+            className="btn-primary btn-block"
+            disabled={caricamento || !!messaggio}
+          >
+            {caricamento && <span className="spinner" aria-hidden="true" />}
+            {caricamento ? "Registrazione in corso..." : "Registrati"}
           </button>
 
           <p className="auth-footer-text">

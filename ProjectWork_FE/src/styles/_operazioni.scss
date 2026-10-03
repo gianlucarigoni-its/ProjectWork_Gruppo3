@@ -1,4 +1,4 @@
-@use 'variables' as *;
+@use "variables" as *;
 
 /* ==========================================================================
    RICERCA MOVIMENTI & TABELLE
@@ -28,7 +28,7 @@
     }
 
     &.active {
-      background: linear-gradient(135deg, rgba($accent-green, 0.15) 0%, rgba($accent-orange, 0.15) 100%);
+      background: $gradient-active;
       border-color: rgba($accent-green, 0.4);
       color: $accent-green;
     }
@@ -37,10 +37,7 @@
 
 // Card contenitore form ricerca
 .ricerca-card {
-  background: $bg-card;
-  border: 1px solid $border-color;
-  border-radius: $radius-lg;
-  padding: 1.5rem;
+  @include card;
   margin-bottom: 1.5rem;
 }
 
@@ -61,74 +58,32 @@
     text-transform: uppercase;
     color: $text-muted;
 
+    @include mobile {
+      flex: 1 1 100%;
+      input,
+      select {
+        width: 100%;
+      }
+    }
+
     input,
     select {
-      min-width: 180px;
-      padding: 0.65rem 0.8rem;
-      background: $bg-dark;
-      border: 1px solid $border-color;
-      border-radius: $radius-md;
-      color: $text-main;
-      font-size: 0.95rem;
-      outline: none;
-      color-scheme: dark;
-      transition: $transition;
-
-      &:focus {
-        border-color: $accent-orange;
-      }
+      @include input-base;
+      min-width: min(180px, 100%);
+      width: auto;
+      font-size: $fs-md;
     }
   }
 }
 
-// Bottoni ricerca (Primary & Secondary)
-.btn-primary {
-  padding: 0.7rem 1.4rem;
-  background: $accent-orange;
-  color: $text-white;
-  border: none;
-  border-radius: $radius-md;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: $transition;
-
-  &:hover:not(:disabled) {
-    background: $accent-orange-hover;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
-.btn-secondary {
-  padding: 0.6rem 1.2rem;
-  background: $success-bg;
-  color: $accent-green;
-  border: 1px solid rgba($accent-green, 0.4);
-  border-radius: $radius-md;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: $transition;
-
-  &:hover:not(:disabled) {
-    background: rgba($accent-green, 0.25);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
+// I bottoni .btn-primary / .btn-secondary sono definiti in _components.scss
 
 // Toolbar & Messaggi
 .ricerca-error {
   color: $error-color;
   padding: 0.75rem 1rem;
   background: $error-bg;
+  border: 1px solid $error-border;
   border-radius: $radius-md;
   margin-bottom: 1.5rem;
 }
@@ -175,6 +130,14 @@
 
     &.right {
       text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  tbody tr {
+    transition: $transition;
+    &:hover {
+      background: rgba($text-white, 0.03);
     }
   }
 
@@ -183,21 +146,250 @@
   }
 }
 
-// Badge Categoria & Sidebar Section
-.category-badge {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  background: $bg-card-hover;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  color: $text-dark-label;
+// ==========================================
+// PAGINA MOVIMENTI: filtri compatti + risultati in primo piano
+// ==========================================
+.page-header {
+  margin-bottom: $space-4;
+
+  h1 {
+    font-size: clamp(1.4rem, 3vw, 1.75rem);
+    font-weight: 700;
+    color: $text-white;
+  }
+
+  p {
+    color: $text-muted;
+    font-size: $fs-sm;
+  }
 }
 
-.sidebar-section {
-  margin: 1rem 0 0.25rem 1rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.filter-bar {
+  @include card($space-4);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: $space-3;
+  align-items: end;
+  margin-bottom: $space-4;
+
+  .form-group {
+    gap: 0.25rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 0.5rem 0.7rem;
+    font-size: $fs-sm;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: $space-2;
+  }
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    .filter-actions {
+      grid-column: 1 / -1;
+      justify-content: flex-end;
+    }
+  }
+
+  @include small-mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.results-card {
+  @include card(0);
+  overflow: hidden;
+}
+
+.results-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  border-bottom: 1px solid $border-color;
+
+  .results-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-2 $space-5;
+    color: $text-muted;
+    font-size: $fs-sm;
+  }
+
+  .saldo-inline strong {
+    margin-left: 0.4rem;
+    color: $text-white;
+    font-size: $fs-lg;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// La tabella cresce quanto serve e scorre l'intera pagina.
+// overflow-x resta solo per gli schermi stretti (mobile).
+.results-scroll {
+  min-height: 220px;
+  overflow-x: auto;
+
+  .ricerca-table th:nth-child(1) {
+    width: 22%;
+  }
+  .ricerca-table th:nth-child(2) {
+    width: 22%;
+  }
+}
+
+.results-skeleton {
+  height: 44px;
+  margin: $space-3 $space-4;
+}
+
+// Importi nella tabella (verde/rosso)
+.ricerca-table .tx-amount {
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.positivo {
+    color: $accent-green;
+  }
+  &.negativo {
+    color: $error-color;
+  }
+}
+
+.filter-hint {
+  margin: -$space-2 0 $space-4 $space-1;
   color: $text-muted;
+  font-size: $fs-sm;
+}
+
+.results-loading {
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+// Righe cliccabili
+.ricerca-table tbody tr.clickable {
+  cursor: pointer;
+}
+
+.row-link {
+  color: $text-main;
+
+  &:hover {
+    color: $accent-orange;
+  }
+}
+
+// Riga movimento in home cliccabile
+.transactions-list a.transaction-item {
+  transition: $transition;
+
+  &:hover {
+    background: #2b323a;
+  }
+}
+
+// Dettaglio movimento
+.detail-hero {
+  @include card;
+  background: $gradient-balance-card;
+  margin-bottom: $space-5;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+
+  .detail-label {
+    color: $text-muted;
+    font-size: $fs-sm;
+  }
+
+  .detail-amount {
+    font-size: clamp(2rem, 6vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    font-variant-numeric: tabular-nums;
+
+    &.positivo {
+      color: $accent-green;
+    }
+    &.negativo {
+      color: $error-color;
+    }
+  }
+
+  .category-badge {
+    align-self: flex-start;
+  }
+}
+
+.detail-card {
+  max-width: 640px;
+}
+
+// Righe cliccabili
+.ricerca-table tbody tr.clickable {
+  cursor: pointer;
+}
+
+.row-link {
+  color: $text-main;
+
+  &:hover {
+    color: $accent-orange;
+  }
+}
+
+// Riga movimento in home cliccabile
+.transactions-list a.transaction-item {
+  transition: $transition;
+
+  &:hover {
+    background: #2b323a;
+  }
+}
+
+// Dettaglio movimento
+.detail-hero {
+  @include card;
+  background: $gradient-balance-card;
+  margin-bottom: $space-5;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+
+  .detail-label {
+    color: $text-muted;
+    font-size: $fs-sm;
+  }
+
+  .detail-amount {
+    font-size: clamp(2rem, 6vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    font-variant-numeric: tabular-nums;
+
+    &.positivo {
+      color: $accent-green;
+    }
+    &.negativo {
+      color: $error-color;
+    }
+  }
+
+  .category-badge {
+    align-self: flex-start;
+  }
+}
+
+.detail-card {
+  max-width: 640px;
 }

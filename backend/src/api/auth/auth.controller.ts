@@ -75,12 +75,16 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 export const changePassword = async (req: TypedRequest<ChangePasswordDto>, res: Response, next: NextFunction) => {
   try {
-    if (req.body.newPassword != req.body.confirmPassword) throw new Error();
+    if (req.body.newPassword !== req.body.confirmPassword) {
+      res.status(400).json({ message: "Le nuove password non coincidono." });
+      return;
+    }
 
     const checkCredentials = await authSrv.checkCredentials(req.account.username, req.body.oldPassword);
-    if (!checkCredentials)
-      //lancia errore credenziali errate
-      throw new Error();
+    if (!checkCredentials) {
+      res.status(400).json({ message: "La password attuale non è corretta." });
+      return;
+    }
 
     await authSrv.changePassword(req.account.username, req.body.newPassword);
 

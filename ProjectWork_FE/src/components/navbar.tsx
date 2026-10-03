@@ -1,49 +1,105 @@
-import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import NavUser from './nav-user';
-import './navbar.css';
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ChevronDown, LogOut, User } from "lucide-react";
+import { api } from "../utils/services/api";
 
-interface NavbarProps {
-  userName?: string;
+// Stessi campi che usa la Home. Fa una chiamata in più: in futuro si può
+// spostare in un context condiviso.
+function useNomeUtente() {
+  const [nome, setNome] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    api
+      .get("/accounts/home", { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => {
+        const d = res.data?.account || res.data?.user || res.data || {};
+        const n = d.firstName || d.nome || d.username || "";
+        const c = d.lastName || d.cognome || "";
+        setNome(`${n} ${c}`.trim());
+      })
+      .catch(() => {}); // errori e 401 li gestisce già la pagina
+  }, []);
+
+  return nome;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ userName = 'Daniel Crudu' }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+const iniziali = (nome: string) =>
+  nome
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0].toUpperCase())
+    .join("") || "?";
+
+export default function Navbar() {
+  const navigate = useNavigate();
+  const nome = useNomeUtente();
+  const [aperto, setAperto] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Chiude il menu con click fuori o tasto Esc
+  useEffect(() => {
+    if (!aperto) return;
+    const onClick = (e: MouseEvent) => {
+      if (!wrapperRef.current?.contains(e.target as Node)) setAperto(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setAperto(false);
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [aperto]);
+
+  const logout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
 
   return (
-    <nav className="navbar">
-      <div className="navbar-left">
-        {/* Voci di navigazione rimosse come richiesto */}
-        <ul className="navbar-nav"></ul>
-      </div>
+    <header className="top-navbar">
+      <Link to="/home" className="navbar-brand">
+        3Vision <span>DigitalBank</span>
+      </Link>
 
-      <div className="navbar-right">
-        {isAuthenticated ? (
-          <NavUser userName={userName} onLogout={() => setIsAuthenticated(false)} />
-        ) : (
-          <NavLink to="/login" className="btn-login-custom">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              fill="currentColor"
-              viewBox="0 0 16 16"
+      <div className="profile-wrapper" ref={wrapperRef}>
+        <button
+          type="button"
+          className="profile-btn"
+          onClick={() => setAperto((v) => !v)}
+          aria-haspopup="menu"
+          aria-expanded={aperto}
+          aria-label="Menu utente"
+        >
+          {nome && <span className="profile-name">{nome}</span>}
+          <span className="avatar">{iniziali(nome)}</span>
+          <ChevronDown size={16} className="chevron" aria-hidden="true" />
+        </button>
+
+        {aperto && (
+          <div className="profile-dropdown" role="menu">
+            <div className="dropdown-user-info">
+              <p className="user-name">{nome || "Il mio account"}</p>
+            </div>
+            <hr />
+            <Link
+              to="/profilo"
+              className="dropdown-item"
+              role="menuitem"
+              onClick={() => setAperto(false)}
             >
-              <path
-                fillRule="evenodd"
-                d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0z"
-              />
-              <path
-                fillRule="evenodd"
-                d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"
-              />
-            </svg>
-            Login
-          </NavLink>
+              <User size={16} aria-hidden="true" /> Il mio profilo
+            </Link>
+            <button type="button" className="dropdown-item logout" role="menuitem" onClick={logout}>
+              <LogOut size={16} aria-hidden="true" /> Esci
+            </button>
+          </div>
         )}
       </div>
-    </nav>
+    </header>
   );
-};
-
-export default Navbar;
+}

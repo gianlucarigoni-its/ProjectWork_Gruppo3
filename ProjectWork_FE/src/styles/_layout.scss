@@ -1,4 +1,4 @@
-@use 'variables' as *;
+@use "variables" as *;
 
 .dashboard-container {
   display: flex;
@@ -7,7 +7,7 @@
   color: $text-main;
 }
 
-// Sidebar Sinistra
+// Sidebar Sinistra (desktop) -> barra di navigazione in basso (mobile)
 .sidebar {
   width: $sidebar-width;
   background: $bg-card;
@@ -16,15 +16,15 @@
   flex-direction: column;
   padding: 1.5rem 1rem;
   position: fixed;
-  height: 100vh;
+  inset: 0 auto 0 0;
   z-index: 10;
+  overflow-y: auto;
 
   .sidebar-logo {
     @include flex-center;
-    margin-bottom: 2rem;
 
     img {
-      height: 45px;
+      height: 200px;
       width: auto;
     }
   }
@@ -40,19 +40,65 @@
       gap: 0.85rem;
       padding: 0.8rem 1rem;
       color: $text-muted;
+      border: 1px solid transparent; // evita lo "scatto" di 1px quando diventa active
       border-radius: $radius-sm;
       font-weight: 500;
       transition: $transition;
 
       &:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba($text-white, 0.05);
         color: $text-white;
       }
 
       &.active {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(249, 115, 22, 0.15) 100%);
+        background: $gradient-active;
         color: $accent-green;
-        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-color: $success-border;
+      }
+    }
+  }
+
+  .sidebar-section {
+    margin: 1rem 0 0.25rem 1rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $text-muted;
+  }
+
+  @include mobile {
+    inset: auto 0 0 0;
+    width: 100%;
+    height: $bottom-nav-height;
+    flex-direction: row;
+    padding: 0 $space-2;
+    border-right: none;
+    border-top: 1px solid $border-color;
+    overflow: visible;
+
+    .sidebar-logo,
+    .sidebar-section {
+      display: none;
+    }
+
+    .sidebar-nav {
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: stretch;
+      width: 100%;
+      gap: $space-1;
+      padding: $space-1 0;
+
+      .nav-item {
+        flex: 1;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.2rem;
+        padding: 0.3rem;
+        font-size: 0.7rem;
+        text-align: center;
+        min-width: 0;
       }
     }
   }
@@ -61,61 +107,121 @@
 // Area Principale
 .main-content {
   flex: 1;
+  min-width: 0; // senza questo tabelle larghe fanno scorrere tutta la pagina
   margin-left: $sidebar-width;
   display: flex;
   flex-direction: column;
 
   @include mobile {
     margin-left: 0;
+    padding-bottom: $bottom-nav-height;
   }
 }
 
 // Topbar
 .top-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   height: $topbar-height;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   padding: 0 2rem;
   border-bottom: 1px solid $border-color;
-  background: $bg-card;
+  background: rgba($bg-card, 0.85);
+  backdrop-filter: blur(8px);
+
+  @include mobile {
+    padding: 0 $space-4;
+  }
+
+  // Su desktop il logo è già nella sidebar: il nome banca serve solo su mobile
+  .navbar-brand {
+    display: none;
+    font-size: $fs-lg;
+    font-weight: 700;
+    color: $text-white;
+
+    span {
+      color: $text-muted;
+      font-weight: 500;
+    }
+
+    @include mobile {
+      display: block;
+    }
+  }
 
   .profile-wrapper {
     position: relative;
+    margin-left: auto;
 
     .profile-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.25rem 0.6rem 0.25rem 0.25rem;
       background: transparent;
-      border: none;
+      border: 1px solid transparent;
+      border-radius: $radius-pill;
+      color: $text-main;
       cursor: pointer;
-      padding: 0;
+      transition: $transition;
+
+      &:hover,
+      &[aria-expanded="true"] {
+        background: $bg-card-hover;
+        border-color: $border-color;
+      }
+
+      .profile-name {
+        order: -1; // il nome sta a sinistra dell'avatar
+        padding-left: 0.5rem;
+        font-size: $fs-sm;
+        font-weight: 500;
+
+        @include small-mobile {
+          display: none;
+        }
+      }
+
+      .chevron {
+        color: $text-muted;
+        transition: transform 0.2s ease;
+      }
+
+      &[aria-expanded="true"] .chevron {
+        transform: rotate(180deg);
+      }
     }
 
     .avatar {
-      width: 42px;
-      height: 42px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       background: $gradient-brand;
       color: $text-white;
       font-weight: 700;
+      font-size: $fs-sm;
       @include flex-center;
-      font-size: 0.95rem;
     }
 
     .profile-dropdown {
       position: absolute;
-      top: 52px;
+      top: calc(100% + 8px);
       right: 0;
-      width: 200px;
+      width: 220px;
       background: $bg-card;
       border: 1px solid $border-color;
       border-radius: $radius-md;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      box-shadow: $shadow-pop;
       padding: 0.5rem;
       z-index: 100;
 
       .dropdown-user-info {
         padding: 0.5rem;
-        
+
         .user-name {
           margin: 0;
           font-weight: 600;
@@ -139,13 +245,15 @@
         background: transparent;
         border: none;
         color: $text-dark-label;
-        font-size: 0.85rem;
+        font-size: $fs-sm;
         border-radius: $radius-sm;
         cursor: pointer;
         text-align: left;
+        transition: $transition;
 
         &:hover {
           background: $bg-card-hover;
+          color: $text-white;
         }
 
         &.logout {
@@ -157,6 +265,8 @@
 }
 
 .dashboard-body {
-  padding: 2rem;
+  width: 100%;
   max-width: 1200px;
+  margin-inline: auto;
+  padding: clamp(1rem, 3vw, 2rem);
 }
