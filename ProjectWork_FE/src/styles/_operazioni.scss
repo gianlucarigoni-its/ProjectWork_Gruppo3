@@ -238,11 +238,20 @@
   min-height: 220px;
   overflow-x: auto;
 
-  .ricerca-table th:nth-child(1) {
-    width: 22%;
+  .ricerca-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 480px;
   }
-  .ricerca-table th:nth-child(2) {
-    width: 22%;
+
+  .ricerca-table th,
+  .ricerca-table td {
+    width: 33.333%;
+  }
+
+  .ricerca-table th:nth-child(2),
+  .ricerca-table td:nth-child(2) {
+    text-align: center;
   }
 }
 

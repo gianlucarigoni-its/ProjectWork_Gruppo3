@@ -14,10 +14,7 @@ const ETICHETTE_CATEGORIE: Record<TransactionCategory, string> = {
   accountOpening: "Apertura conto",
   incomingTransfer: "Bonifico in entrata",
   outgoingTransfer: "Bonifico in uscita",
-  cashWithdrawal: "Prelievo contanti",
-  utilityPayment: "Pagamento utenze",
   topUp: "Ricarica telefonica",
-  atmDeposit: "Versamento ATM",
 };
 
 const NESSUN_FILTRO = {} as TransactionFilterParams;
@@ -295,8 +292,8 @@ export default function RicercaMovimentiPage() {
               <thead>
                 <tr>
                   <th>Data</th>
-                  <th className="right">Importo</th>
                   <th>Categoria</th>
+                  <th className="right">Importo</th>
                 </tr>
               </thead>
               <tbody>
@@ -319,17 +316,17 @@ export default function RicercaMovimentiPage() {
                         new Date(m.date).toLocaleDateString("it-IT")
                       )}
                     </td>
-                    {/* le altre due <td> restano uguali */}
+
+                    <td>
+                      <span className="category-badge">
+                        {ETICHETTE_CATEGORIE[m.category] ?? m.category}
+                      </span>
+                    </td>
                     <td
                       className={`right tx-amount ${m.type === "income" ? "positivo" : "negativo"}`}
                     >
                       {m.type === "income" ? "+" : "-"}
                       {formattaValuta(Math.abs(m.amount))}
-                    </td>
-                    <td>
-                      <span className="category-badge">
-                        {ETICHETTE_CATEGORIE[m.category] ?? m.category}
-                      </span>
                     </td>
                   </tr>
                 ))}

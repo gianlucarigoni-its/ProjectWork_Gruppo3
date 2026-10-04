@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../utils/services/api";
-import { User, ShieldCheck, CreditCard, Hash, Copy, Check, KeyRound } from "lucide-react";
+import { User, CreditCard, Hash, Copy, Check, KeyRound } from "lucide-react";
 
 export interface ProfileResponse {
   id: string;
