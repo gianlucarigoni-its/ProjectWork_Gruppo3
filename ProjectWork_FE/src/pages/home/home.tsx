@@ -5,10 +5,13 @@ import { Wallet, ArrowLeftRight, Send, Eye, EyeOff, ChevronRight } from "lucide-
 
 interface Movimento {
   id: number;
-  descrizione: string;
-  data: string;
-  importo: number | string;
-  tipo: "positivo" | "negativo";
+  descrizione?: string;
+  data?: string;
+  date?: string;
+  importo?: number | string;
+  amount?: number | string;
+  tipo?: "positivo" | "negativo";
+  type?: string;
 }
 
 const MASCHERA_SALDO = "•••••••• €";
@@ -21,11 +24,16 @@ const formattaValuta = (valore: number, conSegno = false) =>
     signDisplay: conSegno ? "always" : "auto",
   }).format(valore);
 
-// Il segno dipende da `tipo`, così funziona sia con importi già negativi sia positivi
-const formattaMovimento = (item: Movimento) => {
-  const n = Number(item.importo);
-  if (Number.isNaN(n)) return String(item.importo);
-  return formattaValuta(item.tipo === "negativo" ? -Math.abs(n) : Math.abs(n), true);
+const formattaMovimento = (item: any) => {
+  const val = item.amount ?? item.importo;
+  const n = Number(val);
+  if (Number.isNaN(n)) return String(val);
+
+  // È un'entrata (+) soltanto se type è "income" oppure tipo è "positivo"
+  const isIncome = item.type === "income" || item.tipo === "positivo";
+  
+  const segno = isIncome ? "+" : "-";
+  return `${segno}${formattaValuta(Math.abs(n))}`;
 };
 
 export default function HomePage() {
@@ -69,17 +77,26 @@ export default function HomePage() {
 
         const listaMovimenti = resConto.data.transactions || dataAccount.transactions || [];
 
-        const movimentiFormattati = listaMovimenti.map((m: any) => ({
-          id: m.id || m._id,
-          descrizione: m.descrizione || m.description || m.type || "Movimento",
-          data: m.data
-            ? new Date(m.data).toLocaleDateString("it-IT")
-            : m.createdAt
-              ? new Date(m.createdAt).toLocaleDateString("it-IT")
-              : "",
-          importo: m.importo ?? m.amount ?? 0,
-          tipo: m.tipo || (Number(m.importo ?? m.amount) >= 0 ? "positivo" : "negativo"),
-        }));
+        const movimentiFormattati = listaMovimenti.map((m: any) => {
+          // Determina se è un'entrata basandosi su m.type === "income" o m.tipo
+          const isIncome = m.type === "income" || m.tipo === "positivo" || m.tipo === "IN";
+
+          return {
+            id: m.id || m._id,
+            descrizione: m.descrizione || m.description || m.type || "Movimento",
+            data: m.data
+              ? new Date(m.data).toLocaleDateString("it-IT")
+              : m.createdAt
+                ? new Date(m.createdAt).toLocaleDateString("it-IT")
+                : m.date
+                  ? new Date(m.date).toLocaleDateString("it-IT")
+                  : "",
+            importo: m.importo ?? m.amount ?? 0,
+            amount: m.amount ?? m.importo ?? 0,
+            type: m.type,
+            tipo: isIncome ? "positivo" : "negativo",
+          };
+        });
 
         setMovimentiRecenti(movimentiFormattati);
       }
