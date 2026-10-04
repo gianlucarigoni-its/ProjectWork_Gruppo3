@@ -164,6 +164,16 @@ export default function RicercaMovimentiPage() {
   const quanti = movimenti?.length ?? 0;
   const oggi = oggiISO();
 
+  const limiteValido = n !== "" && Number.isInteger(Number(n)) && Number(n) >= 1;
+  const handleLimiteChange = (valore: string) => {
+    setN(valore);
+    if (valore === "") {
+      setCategoria("");
+      setDal("");
+      setAl("");
+    }
+  };
+
   return (
     <>
       <div className="page-header">
@@ -181,7 +191,7 @@ export default function RicercaMovimentiPage() {
             inputMode="numeric"
             placeholder="Tutti"
             value={n}
-            onChange={(e) => setN(e.target.value)}
+            onChange={(e) => handleLimiteChange(e.target.value)}
           />
         </div>
 
