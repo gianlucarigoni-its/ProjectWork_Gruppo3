@@ -119,9 +119,6 @@ export default function ProfilePage() {
                 {profilo.firstName} {profilo.lastName}
               </h2>
               <p>{profilo.username}</p>
-              <span className="status-badge">
-                <ShieldCheck size={14} aria-hidden="true" /> Conto attivo
-              </span>
             </div>
             <Link to="/modifica-password" className="btn-ghost">
               <KeyRound size={16} aria-hidden="true" /> Modifica password
