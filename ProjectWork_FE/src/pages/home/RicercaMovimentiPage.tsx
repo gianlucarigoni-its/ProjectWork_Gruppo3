@@ -197,7 +197,12 @@ export default function RicercaMovimentiPage() {
 
         <div className="form-group">
           <label htmlFor="categoria">Categoria</label>
-          <select id="categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+          <select
+            id="categoria"
+            value={categoria}
+            disabled={!limiteValido}
+            onChange={(e) => setCategoria(e.target.value)}
+          >
             <option value="">Tutte</option>
             {Object.values(TransactionCategory).map((c) => (
               <option key={c} value={c}>
@@ -214,6 +219,7 @@ export default function RicercaMovimentiPage() {
             type="date"
             max={al || oggi}
             value={dal}
+            disabled={!limiteValido}
             onChange={(e) => setDal(e.target.value)}
           />
         </div>
@@ -226,6 +232,7 @@ export default function RicercaMovimentiPage() {
             min={dal || undefined}
             max={oggi}
             value={al}
+            disabled={!limiteValido}
             onChange={(e) => setAl(e.target.value)}
           />
         </div>
