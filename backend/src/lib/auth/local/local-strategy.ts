@@ -22,6 +22,11 @@ passport.use(
         });
       }
 
+      // Conto non ancora attivato: la conferma via email è obbligatoria
+      if (!identity.isVerified) {
+        return done(null, false, { message: "Conferma prima la tua email per accedere." });
+      }
+
       return done(null, identity.account);
     } catch (err) {
       return done(err);

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { CheckCircle2 } from "lucide-react";
 import { authService } from "../../utils/services/authService";
 
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Stessa regola del backend (ChangePasswordDto); se RegisterDto è diverso, adattala
-const REGEX_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+// Regola della consegna: almeno 8 caratteri, una maiuscola e un simbolo
+const REGEX_PASSWORD = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -16,7 +17,6 @@ export default function RegisterPage() {
   const [errore, setErrore] = useState<string | null>(null);
   const [messaggio, setMessaggio] = useState<string | null>(null);
   const [caricamento, setCaricamento] = useState(false);
-  const navigate = useNavigate();
 
   const nonCoincidono = confermaPassword !== "" && password !== confermaPassword;
 
@@ -34,7 +34,7 @@ export default function RegisterPage() {
       return "Inserisci un indirizzo email valido.";
     }
     if (!REGEX_PASSWORD.test(password)) {
-      return "La password deve avere almeno 8 caratteri, una maiuscola, una minuscola, un numero e un simbolo.";
+      return "La password deve avere almeno 8 caratteri, una maiuscola e un simbolo.";
     }
     if (password !== confermaPassword) {
       return "Le password non coincidono.";
@@ -62,8 +62,9 @@ export default function RegisterPage() {
         nomeTitolare: nomeTitolare.trim(),
         cognomeTitolare: cognomeTitolare.trim(),
       });
-      setMessaggio(response.data.message || "Registrazione completata!");
-      setTimeout(() => navigate("/login"), 2500);
+      setMessaggio(
+        response.data.message || "Controlla la tua email e clicca sul link per attivare il conto.",
+      );
     } catch (err: any) {
       const msg = err?.response?.data?.message;
       setErrore(Array.isArray(msg) ? msg.join(" ") : msg || "Errore durante la registrazione.");
@@ -83,101 +84,105 @@ export default function RegisterPage() {
           />
         </div>
 
-        <div className="auth-header">
-          <h2>Crea il tuo account</h2>
-          <p className="auth-subtitle">Inizia a gestire le tue finanze in modo semplice</p>
-        </div>
-
-        {errore && (
-          <div className="alert alert-error" role="alert">
-            {errore}
+        {messaggio ? (
+          <div className="result-state" role="status">
+            <CheckCircle2 size={56} className="result-icon" aria-hidden="true" />
+            <h2>Registrazione completata!</h2>
+            <p>{messaggio}</p>
+            <Link to="/login" className="btn-primary btn-block">
+              Vai al login
+            </Link>
           </div>
-        )}
-        {messaggio && (
-          <div className="alert alert-success" role="status">
-            {messaggio}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="auth-form" noValidate>
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="nome">Nome</label>
-              <input
-                id="nome"
-                type="text"
-                autoComplete="given-name"
-                placeholder="Mario"
-                value={nomeTitolare}
-                onChange={(e) => setNomeTitolare(e.target.value)}
-              />
+        ) : (
+          <>
+            <div className="auth-header">
+              <h2>Crea il tuo account</h2>
+              <p className="auth-subtitle">Inizia a gestire le tue finanze in modo semplice</p>
             </div>
-            <div className="form-group">
-              <label htmlFor="cognome">Cognome</label>
-              <input
-                id="cognome"
-                type="text"
-                autoComplete="family-name"
-                placeholder="Rossi"
-                value={cognomeTitolare}
-                onChange={(e) => setCognomeTitolare(e.target.value)}
-              />
-            </div>
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="mario.rossi@esempio.it"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+            {errore && (
+              <div className="alert alert-error" role="alert">
+                {errore}
+              </div>
+            )}
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              aria-describedby="passwordHint"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <span id="passwordHint" className="field-hint">
-              Almeno 8 caratteri, una maiuscola, una minuscola, un numero e un simbolo.
-            </span>
-          </div>
+            <form onSubmit={handleSubmit} className="auth-form" noValidate>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="nome">Nome</label>
+                  <input
+                    id="nome"
+                    type="text"
+                    autoComplete="given-name"
+                    placeholder="Mario"
+                    value={nomeTitolare}
+                    onChange={(e) => setNomeTitolare(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="cognome">Cognome</label>
+                  <input
+                    id="cognome"
+                    type="text"
+                    autoComplete="family-name"
+                    placeholder="Rossi"
+                    value={cognomeTitolare}
+                    onChange={(e) => setCognomeTitolare(e.target.value)}
+                  />
+                </div>
+              </div>
 
-          <div className="form-group">
-            <label htmlFor="confermaPassword">Conferma password</label>
-            <input
-              id="confermaPassword"
-              type="password"
-              autoComplete="new-password"
-              aria-invalid={nonCoincidono}
-              value={confermaPassword}
-              onChange={(e) => setConfermaPassword(e.target.value)}
-            />
-            {nonCoincidono && <span className="field-error">Le password non coincidono.</span>}
-          </div>
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="mario.rossi@esempio.it"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
 
-          <button
-            type="submit"
-            className="btn-primary btn-block"
-            disabled={caricamento || !!messaggio}
-          >
-            {caricamento && <span className="spinner" aria-hidden="true" />}
-            {caricamento ? "Registrazione in corso..." : "Registrati"}
-          </button>
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-describedby="passwordHint"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <span id="passwordHint" className="field-hint">
+                  Almeno 8 caratteri, una maiuscola e un simbolo.
+                </span>
+              </div>
 
-          <p className="auth-footer-text">
-            Hai già un account? <Link to="/login">Accedi</Link>
-          </p>
-        </form>
+              <div className="form-group">
+                <label htmlFor="confermaPassword">Conferma password</label>
+                <input
+                  id="confermaPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={nonCoincidono}
+                  value={confermaPassword}
+                  onChange={(e) => setConfermaPassword(e.target.value)}
+                />
+                {nonCoincidono && <span className="field-error">Le password non coincidono.</span>}
+              </div>
+
+              <button type="submit" className="btn-primary btn-block" disabled={caricamento}>
+                {caricamento && <span className="spinner" aria-hidden="true" />}
+                {caricamento ? "Registrazione in corso..." : "Registrati"}
+              </button>
+
+              <p className="auth-footer-text">
+                Hai già un account? <Link to="/login">Accedi</Link>
+              </p>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );

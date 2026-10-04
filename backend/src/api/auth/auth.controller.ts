@@ -13,7 +13,10 @@ export const register = async (req: TypedRequest<RegisterDto>, res: Response, ne
   try {
     const { username, password, confermaPassword, firstName, lastName } = req.body;
 
-    if (password != confermaPassword) throw new Error(); //da cambiare
+    if (password !== confermaPassword) {
+      res.status(400).json({ message: "Le password non coincidono." });
+      return;
+    }
 
     const ip = accountSrv.getClientIp(req.headers, req.socket, req.ip);
 
@@ -110,11 +113,15 @@ export const verifyEmail = async (req: TypedRequest<unknown, VerifyEmailDto>, re
 
     const verify = await authSrv.verifyEmail(verifyToken);
 
-    if (!verify) throw new Error("Token non valido o scaduto");
-
+    if (!verify) {
+      res.status(400).json({ message: "Token non valido o scaduto." });
+      return;
+    }
     const account = await authSrv.openAccount(verify.accountId);
-
-    if (!account) throw new Error("Impossibile creare conto corrente");
+    if (!account) {
+      res.status(500).json({ message: "Impossibile creare il conto corrente." });
+      return;
+    }
 
     // Risposta JSON al frontend
     res.status(200).json({
