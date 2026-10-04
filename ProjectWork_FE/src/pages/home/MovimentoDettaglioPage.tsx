@@ -77,6 +77,7 @@ export default function MovimentoDettaglioPage() {
               {entrata ? "+" : "-"}
               {formattaValuta(Math.abs(movimento.amount))}
             </span>
+            {movimento.description && <p className="detail-description">{movimento.description}</p>}
             <span className="category-badge">
               {ETICHETTE_CATEGORIE[movimento.category] ?? movimento.category}
             </span>
