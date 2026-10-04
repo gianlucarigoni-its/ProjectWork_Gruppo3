@@ -153,7 +153,7 @@ export default function HomePage() {
           <div className="transactions-card">
             <div className="card-header">
               <h3>Ultimi 5 movimenti</h3>
-              <Link to="/transactions" className="see-all-link">
+              <Link to="/movimenti" className="see-all-link">
                 Vedi tutti <ChevronRight size={18} />
               </Link>
             </div>
