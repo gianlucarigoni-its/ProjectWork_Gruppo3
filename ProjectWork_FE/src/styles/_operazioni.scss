@@ -235,7 +235,6 @@
 // La tabella cresce quanto serve e scorre l'intera pagina.
 // overflow-x resta solo per gli schermi stretti (mobile).
 .results-scroll {
-  min-height: 220px;
   overflow-x: auto;
 
   .ricerca-table {
