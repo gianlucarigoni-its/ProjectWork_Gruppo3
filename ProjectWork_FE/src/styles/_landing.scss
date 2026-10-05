@@ -11,21 +11,6 @@
   }
 }
 
-// ---------- Barra in alto ----------
-.landing-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1200px;
-  margin-inline: auto;
-  padding: $space-4 clamp(1rem, 4vw, 2rem);
-
-  img {
-    height: 44px;
-    width: auto;
-  }
-}
-
 // ---------- Hero ----------
 .landing-hero {
   padding: clamp(3rem, 9vw, 6.5rem) clamp(1rem, 4vw, 2rem);
@@ -33,6 +18,13 @@
   background:
     radial-gradient(ellipse 60% 70% at 20% 0%, rgba($accent-green, 0.2), transparent 70%),
     radial-gradient(ellipse 60% 70% at 85% 10%, rgba($accent-orange, 0.18), transparent 70%);
+
+  .hero-logo {
+    display: block;
+    height: clamp(80px, 14vw, 130px);
+    width: auto;
+    margin: 0 auto $space-5;
+  }
 
   .hero-title {
     max-width: 20ch;
