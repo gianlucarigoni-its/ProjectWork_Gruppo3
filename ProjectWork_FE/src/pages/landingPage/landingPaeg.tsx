@@ -36,15 +36,13 @@ export default function LandingPage() {
 
   return (
     <div className="landing">
-      <header className="landing-nav">
-        <img src="/img/3Vision_DigitalBank_LogoRMBG_white.png" alt="3Vision DigitalBank" />
-        <Link to="/login" className="btn-ghost btn-sm">
-          Accedi
-        </Link>
-      </header>
-
       <main>
         <section className="landing-hero">
+          <img
+            src="/img/3Vision_DigitalBank_LogoRMBG_white.png"
+            alt="3Vision DigitalBank"
+            className="hero-logo"
+          />
           <h1 className="hero-title">
             La tua banca, <span>semplice</span> e sempre a portata di mano
           </h1>
