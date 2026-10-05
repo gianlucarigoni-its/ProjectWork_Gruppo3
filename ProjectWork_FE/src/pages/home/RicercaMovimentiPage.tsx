@@ -106,10 +106,6 @@ export default function RicercaMovimentiPage() {
     if (dal && al && dal > al) {
       return "La data iniziale non può essere successiva alla data finale.";
     }
-    // Con categoria o date si cercano "gli ultimi n movimenti"
-    if ((categoria || dal || al) && n === "") {
-      return "Con categoria o date indica anche quanti movimenti mostrare.";
-    }
     if ((dal && dal > oggiISO()) || (al && al > oggiISO())) {
       return "Non puoi selezionare una data futura.";
     }
@@ -161,16 +157,6 @@ export default function RicercaMovimentiPage() {
   const quanti = movimenti?.length ?? 0;
   const oggi = oggiISO();
 
-  const limiteValido = n !== "" && Number.isInteger(Number(n)) && Number(n) >= 1;
-  const handleLimiteChange = (valore: string) => {
-    setN(valore);
-    if (valore === "") {
-      setCategoria("");
-      setDal("");
-      setAl("");
-    }
-  };
-
   return (
     <>
       <div className="page-header">
@@ -188,18 +174,13 @@ export default function RicercaMovimentiPage() {
             inputMode="numeric"
             placeholder="Tutti"
             value={n}
-            onChange={(e) => handleLimiteChange(e.target.value)}
+            onChange={(e) => setN(e.target.value)}
           />
         </div>
 
         <div className="form-group">
           <label htmlFor="categoria">Categoria</label>
-          <select
-            id="categoria"
-            value={categoria}
-            disabled={!limiteValido}
-            onChange={(e) => setCategoria(e.target.value)}
-          >
+          <select id="categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
             <option value="">Tutte</option>
             {Object.values(TransactionCategory).map((c) => (
               <option key={c} value={c}>
@@ -216,7 +197,6 @@ export default function RicercaMovimentiPage() {
             type="date"
             max={al || oggi}
             value={dal}
-            disabled={!limiteValido}
             onChange={(e) => setDal(e.target.value)}
           />
         </div>
@@ -229,7 +209,6 @@ export default function RicercaMovimentiPage() {
             min={dal || undefined}
             max={oggi}
             value={al}
-            disabled={!limiteValido}
             onChange={(e) => setAl(e.target.value)}
           />
         </div>
