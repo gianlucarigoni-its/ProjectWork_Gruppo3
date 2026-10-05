@@ -59,11 +59,13 @@ export default function LoginPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-brand">
-          <img
-            src="/img/3Vision_DigitalBank_LogoRMBG_white.png"
-            alt="3Vision Logo"
-            className="auth-logo-img"
-          />
+          <Link to="/" className="sidebar-logo" aria-label="Vai alla home">
+            <img
+              src="/img/3Vision_DigitalBank_LogoRMBG_white.png"
+              alt="3Vision Logo"
+              className="auth-logo-img"
+            />
+          </Link>
         </div>
 
         <div className="auth-header">
