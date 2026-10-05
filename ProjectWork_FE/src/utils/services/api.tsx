@@ -1,13 +1,13 @@
-import axios from 'axios';
+import axios from "axios";
 
 export const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: import.meta.env.API_URL,
 });
 
 export const tokenService = {
-  getToken: (): string | null => localStorage.getItem('token'),
-  setToken: (token: string) => localStorage.setItem('token', token),
-  clearToken: () => localStorage.removeItem('token'),
+  getToken: (): string | null => localStorage.getItem("token"),
+  setToken: (token: string) => localStorage.setItem("token", token),
+  clearToken: () => localStorage.removeItem("token"),
 };
 
 api.interceptors.request.use((config) => {
@@ -25,5 +25,5 @@ api.interceptors.response.use(
       tokenService.clearToken();
     }
     return Promise.reject(error);
-  }
+  },
 );
