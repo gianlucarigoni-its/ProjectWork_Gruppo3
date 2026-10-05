@@ -34,20 +34,19 @@ export class LoginDto {
 
 export class ChangePasswordDto {
   @IsString()
-  oldPassword: string;
+  oldPassword!: string;
 
   @IsString()
-  @Matches(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$"), {
-    message: "password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character.",
+  @Matches(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$"), {
+    message: "La password deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola e un simbolo.",
   })
-  @Matches(/(?=.*[^A-Za-z0-9])/, { message: "La password deve contenere almeno un simbolo" })
-  newPassword: string;
+  newPassword!: string;
 
   @IsString()
-  confirmPassword: string;
+  confirmPassword!: string;
 }
 
 export class VerifyEmailDto {
   @IsString()
-  token: string;
+  token!: string;
 }

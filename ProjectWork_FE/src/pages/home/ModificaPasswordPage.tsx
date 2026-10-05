@@ -4,8 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../utils/services/api";
 import { ArrowLeft } from "lucide-react";
 
-// Stessa regola del backend (ChangePasswordDto)
-const REGEX_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+// Regola aggiornata: minuscola, maiuscola, simbolo e almeno 8 caratteri (SENZA numero obbligatorio)
+const REGEX_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
 
 export default function ModificaPasswordPage() {
   const [passwordAttuale, setPasswordAttuale] = useState("");
@@ -21,7 +21,7 @@ export default function ModificaPasswordPage() {
       return "Tutti i campi sono obbligatori.";
     }
     if (!REGEX_PASSWORD.test(nuovaPassword)) {
-      return "La nuova password deve avere almeno 8 caratteri, una maiuscola e un simbolo.";
+      return "La nuova password deve avere almeno 8 caratteri, una lettera maiuscola, una minuscola e un simbolo.";
     }
     if (nuovaPassword !== confermaNuovaPassword) {
       return "Le nuove password non coincidono.";
@@ -52,7 +52,7 @@ export default function ModificaPasswordPage() {
     setCaricamento(true);
     try {
       const response = await api.patch<{ message: string }>(
-        "/auth/password", // = prefisso a cui monti il router auth + /password
+        "/auth/password",
         {
           oldPassword: passwordAttuale,
           newPassword: nuovaPassword,
@@ -65,7 +65,6 @@ export default function ModificaPasswordPage() {
       setNuovaPassword("");
       setConfermaNuovaPassword("");
     } catch (err: any) {
-      // 401 = sessione scaduta, non "password sbagliata"
       if (err?.response?.status === 401) {
         localStorage.clear();
         navigate("/login");
@@ -127,7 +126,7 @@ export default function ModificaPasswordPage() {
             onChange={(e) => setNuovaPassword(e.target.value)}
           />
           <span id="passwordHint" className="field-hint">
-            Almeno 8 caratteri, una maiuscola e un simbolo.
+            Almeno 8 caratteri, una maiuscola, una minuscola e un simbolo.
           </span>
         </div>
 
