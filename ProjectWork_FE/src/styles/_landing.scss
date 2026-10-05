@@ -1,0 +1,192 @@
+@use "variables" as *;
+
+.landing {
+  min-height: 100vh;
+  background: $bg-dark;
+  color: $text-main;
+
+  .btn-lg {
+    padding: 0.9rem 1.75rem;
+    font-size: 1rem;
+  }
+}
+
+// ---------- Barra in alto ----------
+.landing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: $space-4 clamp(1rem, 4vw, 2rem);
+
+  img {
+    height: 44px;
+    width: auto;
+  }
+}
+
+// ---------- Hero ----------
+.landing-hero {
+  padding: clamp(3rem, 9vw, 6.5rem) clamp(1rem, 4vw, 2rem);
+  text-align: center;
+  background:
+    radial-gradient(ellipse 60% 70% at 20% 0%, rgba($accent-green, 0.2), transparent 70%),
+    radial-gradient(ellipse 60% 70% at 85% 10%, rgba($accent-orange, 0.18), transparent 70%);
+
+  .hero-title {
+    max-width: 20ch;
+    margin: 0 auto $space-4;
+    color: $text-white;
+    font-size: clamp(2rem, 6vw, 3.6rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+
+    span {
+      background: $gradient-brand;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  }
+
+  .hero-subtitle {
+    max-width: 56ch;
+    margin: 0 auto $space-6;
+    color: $text-muted;
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: $space-3;
+  }
+}
+
+// ---------- Sezioni ----------
+.landing-section {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: clamp(2.5rem, 6vw, 4rem) clamp(1rem, 4vw, 2rem);
+
+  > h2 {
+    margin-bottom: $space-6;
+    text-align: center;
+    color: $text-white;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: $space-5;
+}
+
+.feature-card {
+  @include card;
+  transition: $transition;
+
+  &:hover {
+    border-color: $accent-orange;
+    transform: translateY(-3px);
+  }
+
+  .feature-icon {
+    @include flex-center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: $space-4;
+    border-radius: $radius-md;
+    background: $success-bg;
+    color: $accent-green;
+  }
+
+  &:nth-child(even) .feature-icon {
+    background: rgba($accent-orange, 0.15);
+    color: $accent-orange;
+  }
+
+  h3 {
+    margin-bottom: $space-2;
+    color: $text-white;
+    font-size: $fs-lg;
+  }
+  p {
+    color: $text-muted;
+    font-size: $fs-md;
+  }
+}
+
+// ---------- Come funziona ----------
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: $space-5;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-2;
+    text-align: center;
+  }
+
+  .step-number {
+    @include flex-center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: $gradient-brand;
+    color: $text-white;
+    font-size: $fs-lg;
+    font-weight: 700;
+  }
+
+  h3 {
+    color: $text-white;
+    font-size: $fs-lg;
+  }
+  p {
+    max-width: 30ch;
+    color: $text-muted;
+    font-size: $fs-md;
+  }
+}
+
+// ---------- Invito finale ----------
+.landing-cta {
+  @include card(2.5rem);
+  background: $gradient-balance-card;
+  text-align: center;
+
+  h2 {
+    margin-bottom: $space-2;
+    color: $text-white;
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+  }
+  p {
+    margin-bottom: $space-5;
+    color: $text-muted;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: $space-3;
+  }
+}
+
+// ---------- Footer ----------
+.landing-footer {
+  padding: $space-5 $space-4;
+  text-align: center;
+  color: $text-muted;
+  font-size: $fs-sm;
+  border-top: 1px solid $border-color;
+}

@@ -13,6 +13,7 @@ import { TransactionsList } from "./components/Transaction.List";
 import ProfilePage from "./pages/home/ProfilePage";
 import BonificoPage from "./pages/home/BonificoPage";
 import MainLayout from "./components/mainLayout";
+import LandingPage from "./pages/landingPage/landingPaeg";
 
 function ProtectedRoute({ children }: { children?: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -31,6 +32,7 @@ function App() {
   return (
     <Routes>
       {/* Rotte Pubbliche */}
+      <Route path="/" element={<LandingPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/conferma/:token" element={<ConfermaPage />} />
